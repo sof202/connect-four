@@ -38,7 +38,7 @@ void ClientSocket::connectToServer(sockaddr_in server_address) {
                                   std::string(strerror(errno)));
       }
    };
-   buffer.resize(bytes_received);
+   buffer.resize(static_cast<std::size_t>(bytes_received));
    return buffer;
 }
 
