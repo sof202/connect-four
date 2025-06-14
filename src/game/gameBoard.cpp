@@ -56,6 +56,7 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
        std::ranges::find(std::ranges::reverse_view(column), symbol)};
    std::size_t row_index{
        static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
+
    int count{1};
    for (int col{static_cast<int>(column_index) - 1};
         col >= 0 &&
@@ -67,8 +68,7 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
    }
    for (std::size_t col{column_index + 1};
         col < Settings::board_columns &&
-        m_game_board.at(static_cast<std::size_t>(col)).at(row_index) ==
-            symbol &&
+        m_game_board.at(col).at(row_index) == symbol &&
         count < Settings::winning_vector_length;
         ++col) {
       count++;
