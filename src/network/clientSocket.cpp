@@ -9,10 +9,11 @@
 #include <stdexcept>
 #include <string>
 
-void ClientSocket::connectToServer(sockaddr_in server_address) {
-   if (connect(socketDescriptor(),
-               reinterpret_cast<sockaddr*>(&server_address),
-               sizeof(server_address)) < 0) {
+#include "network/address.hpp"
+
+void ClientSocket::connectToServer(const IPv4Address& server_address) {
+   if (connect(socketDescriptor(), server_address, server_address.length()) <
+       0) {
       throw std::runtime_error("Error connecting to server: " +
                                std::string(strerror(errno)));
    }

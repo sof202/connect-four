@@ -4,16 +4,13 @@
 #include <cstring>
 #include <iostream>
 
+#include "network/address.hpp"
 #include "network/serverSocket.hpp"
 
 auto main() -> int {
    try {
       ServerSocket server_socket{AF_INET, SOCK_STREAM, 0, true};
-      struct sockaddr_in server_address{};
-      std::memset(&server_address, 0, sizeof(server_address));
-      server_address.sin_family = AF_INET;
-      server_address.sin_addr.s_addr = INADDR_ANY;
-      server_address.sin_port = htons(8080);  // listen on port 8080
+      IPv4Address server_address{8080};
 
       server_socket.bindToAddress(server_address);
       server_socket.listen(5);
@@ -21,7 +18,7 @@ auto main() -> int {
       std::cout << "Server listening on port " << 8080 << "...\n";
 
       while (true) {
-         sockaddr_in client_address{};
+         IPv4Address client_address{};
          ClientSocket client_socket{
              server_socket.acceptClient(client_address)};
          std::cout << "Recieved message from client: "

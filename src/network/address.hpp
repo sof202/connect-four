@@ -12,6 +12,7 @@
 
 class IPv4Address {
   public:
+   IPv4Address() = default;
    explicit IPv4Address(const std::string& ip_address, uint16_t port) {
       if (inet_pton(static_cast<sa_family_t>(AF_INET),
                     ip_address.c_str(),

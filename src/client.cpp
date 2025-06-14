@@ -7,6 +7,7 @@
 #include <exception>
 #include <iostream>
 
+#include "network/address.hpp"
 #include "network/clientSocket.hpp"
 
 auto main() -> int {
@@ -18,13 +19,7 @@ auto main() -> int {
          std::cerr << "Error resolving hostname\n";
          exit(1);
       }
-      struct sockaddr_in server_address{};
-      std::memset(&server_address, 0, sizeof(server_address));
-      server_address.sin_family = AF_INET;
-      std::memcpy(&server_address.sin_addr.s_addr,
-                  server->h_addr,
-                  static_cast<std::size_t>(server->h_length));
-      server_address.sin_port = htons(8080);  // connect to port 8080
+      IPv4Address server_address{8080};
 
       client_socket.connectToServer(server_address);
       client_socket.sendMessage("Hello from client.");

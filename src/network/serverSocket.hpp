@@ -3,6 +3,7 @@
 
 #include <netinet/in.h>
 
+#include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/socket.hpp"
 
@@ -22,9 +23,9 @@ class ServerSocket : public Socket {
    ServerSocket(ServerSocket&& other) noexcept = default;
    auto operator=(ServerSocket&& other) noexcept -> ServerSocket& = default;
 
-   void bindToAddress(sockaddr_in address) const;
+   void bindToAddress(const IPv4Address& address) const;
    void listen(int backlog) const;
-   auto acceptClient(sockaddr_in& client_address) const -> ClientSocket;
+   auto acceptClient(IPv4Address& client_address) const -> ClientSocket;
 };
 
 #endif  // SERVER_SOCKET_H_

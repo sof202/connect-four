@@ -3,6 +3,7 @@
 
 #include <netinet/in.h>
 
+#include "network/address.hpp"
 #include "network/socket.hpp"
 
 class ClientSocket : public Socket {
@@ -20,7 +21,7 @@ class ClientSocket : public Socket {
    auto operator=(ClientSocket&& other) noexcept -> ClientSocket& = default;
 
    [[nodiscard]] auto isConnected() const -> bool { return m_is_connected; }
-   void connectToServer(sockaddr_in server_address);
+   void connectToServer(const IPv4Address& server_address);
    [[nodiscard]] auto receiveMessage(std::size_t max_size, int flags = 0) const
        -> std::string;
    void sendMessage(const std::string& message, int flags = 0) const;
