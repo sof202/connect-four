@@ -8,9 +8,13 @@
 
 class ServerSocket : public Socket {
   public:
-   ServerSocket(int domain, int socket_type, int protocol = 0) :
-       Socket(domain, socket_type, protocol) {}
-   explicit ServerSocket(int socket) : Socket(socket) {}
+   ServerSocket(int domain,
+                int socket_type,
+                int protocol = 0,
+                bool reuse_address = false) :
+       Socket(domain, socket_type, protocol) {
+      setAddressReusage(reuse_address);
+   }
 
    ~ServerSocket() override = default;
    ServerSocket(const ServerSocket&) = delete;
