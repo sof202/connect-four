@@ -20,7 +20,7 @@ class ServerSocket : public Socket {
 
    void bindToAddress(sockaddr_in address) const;
    void listen(int backlog) const;
-   ClientSocket acceptClient(sockaddr_in& client_address) const;
+   auto acceptClient(sockaddr_in& client_address) const -> ClientSocket;
 };
 
 #endif  // SERVER_SOCKET_H_
