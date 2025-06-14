@@ -25,6 +25,7 @@ class Socket {
    [[nodiscard]] auto socketDescriptor() const noexcept -> int {
       return m_socket_descriptor;
    }
+   void setAddressReusage(bool enable) const;
 
    virtual ~Socket() { teardown(); }
    Socket(const Socket&) = delete;
