@@ -51,3 +51,8 @@ void ClientSocket::sendMessage(const std::string& message, int flags) const {
                                std::string(strerror(errno)));
    }
 }
+
+void ClientSocket::teardown() {
+   m_is_connected = false;
+   Socket::teardown();
+}

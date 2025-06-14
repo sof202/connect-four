@@ -13,11 +13,20 @@ class ClientSocket : public Socket {
        Socket(socket),
        m_is_connected{is_connected} {}
 
+   ~ClientSocket() override = default;
+   ClientSocket(const ClientSocket&) = delete;
+   auto operator=(const ClientSocket&) -> ClientSocket& = delete;
+   ClientSocket(ClientSocket&& other) noexcept = default;
+   auto operator=(ClientSocket&& other) noexcept -> ClientSocket& = default;
+
    [[nodiscard]] auto isConnected() const -> bool { return m_is_connected; }
    void connectToServer(sockaddr_in server_address);
    [[nodiscard]] auto receiveMessage(std::size_t max_size, int flags = 0) const
        -> std::string;
    void sendMessage(const std::string& message, int flags = 0) const;
+
+  protected:
+   void teardown() override;
 
   private:
    bool m_is_connected{false};

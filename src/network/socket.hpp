@@ -7,7 +7,7 @@
 #include <utility>
 
 class Socket {
-  public:
+  protected:
    Socket(int domain, int socket_type, int protocol = 0) :
        m_socket_descriptor{socket(domain, socket_type, protocol)} {
       if (!isValid()) throw std::runtime_error("Error creating socket");
@@ -16,8 +16,17 @@ class Socket {
       if (!isValid()) throw std::runtime_error("Invalid socket descriptor.");
    }
 
-   ~Socket() { teardown(); }
+   virtual void teardown();
 
+  public:
+   [[nodiscard]] auto isValid() const noexcept -> bool {
+      return m_socket_descriptor >= 0;
+   }
+   [[nodiscard]] auto socketDescriptor() const noexcept -> int {
+      return m_socket_descriptor;
+   }
+
+   virtual ~Socket() { teardown(); }
    Socket(const Socket&) = delete;
    auto operator=(const Socket&) -> Socket& = delete;
    Socket(Socket&& other) noexcept :
@@ -30,16 +39,8 @@ class Socket {
       return *this;
    }
 
-   [[nodiscard]] auto isValid() const -> bool {
-      return m_socket_descriptor >= 0;
-   }
-   [[nodiscard]] auto socketDescriptor() const -> int {
-      return m_socket_descriptor;
-   }
-
   private:
    int m_socket_descriptor{};
-   void teardown();
 };
 
 #endif  // SOCKET_H_
