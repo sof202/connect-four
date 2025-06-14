@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 
@@ -32,9 +33,9 @@ auto ServerSocket::acceptClient(sockaddr_in &client_address) const
    socklen_t client_address_size{sizeof(client_address)};
    int client_socket{};
    while (true) {
-      int client_socket = accept(socketDescriptor(),
-                                 reinterpret_cast<sockaddr *>(&client_address),
-                                 &client_address_size);
+      client_socket = accept(socketDescriptor(),
+                             reinterpret_cast<sockaddr *>(&client_address),
+                             &client_address_size);
       if (client_socket >= 0) break;
       if (errno != EINTR) {
          throw std::runtime_error("Error accepting socket: " +
