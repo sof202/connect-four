@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <cstring>
 #include <stdexcept>
 #include <string>
@@ -24,14 +25,20 @@ void ClientSocket::connectToServer(sockaddr_in server_address) {
    if (!isConnected()) {
       throw std::runtime_error("Socket is not connected.");
    }
+
    std::string buffer(max_size, '\0');
-   ssize_t bytes_recieved{
-       recv(socketDescriptor(), buffer.data(), buffer.size(), flags)};
-   if (bytes_recieved < 0) {
-      throw std::runtime_error("Error recieving from socket: " +
-                               std::string(strerror(errno)));
-   }
-   buffer.resize(bytes_recieved);
+   ssize_t bytes_received{};
+   while (true) {
+      bytes_received =
+          recv(socketDescriptor(), buffer.data(), buffer.size(), flags);
+      if (bytes_received >= 0) break;
+
+      if (errno != EINTR) {
+         throw std::runtime_error("Error recieving from socket: " +
+                                  std::string(strerror(errno)));
+      }
+   };
+   buffer.resize(bytes_received);
    return buffer;
 }
 
