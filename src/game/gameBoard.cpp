@@ -35,7 +35,8 @@ void Game::addPiece(std::size_t column_index, char symbol) {
 
 auto Game::checkWin(std::size_t column_index, char symbol) -> bool {
    return checkColumnWin(column_index, symbol) ||
-          checkRowWin(column_index, symbol);
+          checkRowWin(column_index, symbol) ||
+          checkDiagonalWin(column_index, symbol);
 }
 
 void Game::setup() {
@@ -90,6 +91,58 @@ auto Game::checkColumnWin(std::size_t column_index, char symbol) -> bool {
    return std::all_of(first_match + 1,
                       first_match + Settings::winning_vector_length,
                       [symbol](char cell) { return cell == symbol; });
+}
+
+auto Game::checkDiagonalWin(std::size_t column_index, char symbol) -> bool {
+   BoardColumn column{m_game_board.at(column_index)};
+   auto first_match{
+       std::ranges::find(std::ranges::reverse_view(column), symbol)};
+   if (first_match == column.rend()) return false;
+   std::size_t row_index{
+       static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
+
+   auto has_symbol{[&](std::size_t col, std::size_t row) {
+      return col < Settings::board_columns &&
+             m_game_board.at(col).at(row) == symbol;
+   }};
+   auto in_range{[&](std::size_t col, std::size_t row) {
+      return col < Settings::board_columns && row < Settings::board_rows;
+   }};
+
+   // x=y line
+   int count{1};
+   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
+      std::size_t col = column_index + i;
+      std::size_t row = row_index + i;
+      if (!in_range(col, row)) break;
+      if (!has_symbol(col, row)) break;
+      if (++count >= Settings::winning_vector_length) return true;
+   }
+   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
+      std::size_t col = column_index - i;
+      std::size_t row = row_index - i;
+      if (!in_range(col, row)) break;
+      if (!has_symbol(col, row)) break;
+      if (++count >= Settings::winning_vector_length) return true;
+   }
+
+   // x=-y line
+   count = 1;
+   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
+      std::size_t col = column_index - i;
+      std::size_t row = row_index + i;
+      if (!in_range(col, row)) break;
+      if (!has_symbol(col, row)) break;
+      if (++count >= Settings::winning_vector_length) return true;
+   }
+   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
+      std::size_t col = column_index + i;
+      std::size_t row = row_index - i;
+      if (!in_range(col, row)) break;
+      if (!has_symbol(col, row)) break;
+      if (++count >= Settings::winning_vector_length) return true;
+   }
+   return false;
 }
 
 }  // namespace ConnectFour
