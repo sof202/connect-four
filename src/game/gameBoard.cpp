@@ -54,6 +54,7 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
    BoardColumn column{m_game_board.at(column_index)};
    auto first_match{
        std::ranges::find(std::ranges::reverse_view(column), symbol)};
+   if (first_match == column.rend()) return false;
    std::size_t row_index{
        static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
 
