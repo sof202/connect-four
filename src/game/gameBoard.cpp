@@ -57,19 +57,22 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
    if (first_match == column.rend()) return false;
    std::size_t row_index{
        static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
+   auto has_symbol{[&](std::size_t col) {
+      return col < Settings::board_columns &&
+             m_game_board.at(col).at(row_index) == symbol;
+   }};
 
    int count{1};
    for (int col{static_cast<int>(column_index) - 1};
-        col >= 0 &&
-        m_game_board.at(static_cast<std::size_t>(col)).at(row_index) ==
-            symbol &&
+        col >= 0 && has_symbol(static_cast<std::size_t>(col)) &&
         count < Settings::winning_vector_length;
         --col) {
       count++;
    }
+   if (count >= Settings::winning_vector_length) return true;
+
    for (std::size_t col{column_index + 1};
-        col < Settings::board_columns &&
-        m_game_board.at(col).at(row_index) == symbol &&
+        col < Settings::board_columns && has_symbol(col) &&
         count < Settings::winning_vector_length;
         ++col) {
       count++;
