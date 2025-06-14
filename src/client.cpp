@@ -10,16 +10,16 @@
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
 
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
+   if (argc != 3) {
+      std::cerr << "Usage: " << argv[0] << "ip_address port\n";
+      return 1;
+   }
+   std::string ip_address{argv[1]};
+   auto port{static_cast<uint16_t>(std::stoi(argv[2]))};
    try {
       ClientSocket client_socket{AF_INET, SOCK_STREAM};
-      struct hostent* server =
-          gethostbyname("localhost");  // resolve host name
-      if (server == nullptr) {
-         std::cerr << "Error resolving hostname\n";
-         exit(1);
-      }
-      IPv4Address server_address{8080};
+      IPv4Address server_address{ip_address, port};
 
       client_socket.connectToServer(server_address);
       client_socket.sendMessage("Hello from client.");

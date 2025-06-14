@@ -3,19 +3,27 @@
 
 #include <cstring>
 #include <iostream>
+#include <string>
 
 #include "network/address.hpp"
 #include "network/serverSocket.hpp"
 
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
+   if (argc != 3) {
+      std::cerr << "Usage: " << argv[0] << "ip_address port\n";
+      return 1;
+   }
+   std::string ip_address{argv[1]};
+   auto port{static_cast<uint16_t>(std::stoi(argv[2]))};
    try {
       ServerSocket server_socket{AF_INET, SOCK_STREAM, 0, true};
-      IPv4Address server_address{8080};
+      IPv4Address server_address{ip_address, port};
 
       server_socket.bindToAddress(server_address);
       server_socket.listen(5);
 
-      std::cout << "Server listening on port " << 8080 << "...\n";
+      std::cout << "Server (ip: " << ip_address << ") listening on port "
+                << port << "...\n";
 
       while (true) {
          IPv4Address client_address{};
