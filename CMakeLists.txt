@@ -13,6 +13,10 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Dev") 
+add_compile_options(-ggdb -pedantic-errors -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -Werror)
+endif()
+
 add_compile_definitions(BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 
 # ------------------
@@ -24,21 +28,38 @@ if(NOT PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 endif()
 
 # ------------------
-# Build
+# Build network lib
 # ------------------
-add_executable(
-    connect-four
-    src/main.cpp
+set(NETWORK_SOURCES
+    src/network/socket.cpp
+    src/network/clientSocket.cpp
+    src/network/serverSocket.cpp
 )
-target_include_directories(
-    connect-four
-    PUBLIC
-        src/
+set(NETWORK_HEADERS
+    src/network/socket.hpp
+    src/network/clientSocket.hpp
+    src/network/serverSocket.hpp
+)
+add_library(network_lib STATIC ${NETWORK_SOURCES} ${NETWORK_HEADERS})
+target_include_directories(network_lib
+    PUBLIC 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # ------------------
-# Install
+# Build server
 # ------------------
-install(TARGETS connect-four
-RUNTIME DESTINATION bin
+add_executable(
+    server
+    src/server.cpp
 )
+target_link_libraries(server PRIVATE network_lib)
+
+# ------------------
+# Build client
+# ------------------
+add_executable(
+    client
+    src/client.cpp
+)
+target_link_libraries(client PRIVATE network_lib)
