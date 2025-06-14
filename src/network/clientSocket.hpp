@@ -9,7 +9,9 @@ class ClientSocket : public Socket {
   public:
    ClientSocket(int domain, int socket_type, int protocol = 0) :
        Socket(domain, socket_type, protocol) {}
-   explicit ClientSocket(int socket) : Socket(socket) {}
+   explicit ClientSocket(int socket, bool is_connected = false) :
+       Socket(socket),
+       m_is_connected{is_connected} {}
 
    [[nodiscard]] auto isConnected() const -> bool { return m_is_connected; }
    void connectToServer(sockaddr_in server_address);
