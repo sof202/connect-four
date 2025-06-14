@@ -39,6 +39,7 @@ set(NETWORK_HEADERS
     src/network/socket.hpp
     src/network/clientSocket.hpp
     src/network/serverSocket.hpp
+    src/network/address.hpp
 )
 add_library(network_lib STATIC ${NETWORK_SOURCES} ${NETWORK_HEADERS})
 target_include_directories(network_lib
