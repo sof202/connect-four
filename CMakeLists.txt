@@ -28,6 +28,22 @@ if(NOT PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 endif()
 
 # ------------------
+# Build game lib
+# ------------------
+set(GAME_SOURCES
+    src/game/gameBoard.cpp
+)
+set(GAME_HEADERS
+    src/game/gameSettings.hpp
+    src/game/gameBoard.hpp
+)
+add_library(game_lib STATIC ${GAME_SOURCES} ${GAME_HEADERS})
+target_include_directories(game_lib
+    PUBLIC 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+# ------------------
 # Build network lib
 # ------------------
 set(NETWORK_SOURCES
@@ -59,6 +75,7 @@ add_executable(
     src/server.cpp
 )
 target_link_libraries(server PRIVATE network_lib)
+target_link_libraries(server PRIVATE game_lib)
 
 # ------------------
 # Build client
@@ -68,3 +85,13 @@ add_executable(
     src/client.cpp
 )
 target_link_libraries(client PRIVATE network_lib)
+target_link_libraries(client PRIVATE game_lib)
+
+# ------------------
+# Build client
+# ------------------
+add_executable(
+    game_test
+    src/game_test.cpp
+)
+target_link_libraries(game_test PRIVATE game_lib)
