@@ -1,0 +1,28 @@
+CompileFlags:
+  CompilationDatabase: build
+Diagnostics:
+  ClangTidy:
+    Add: [
+      clang-analyzer-*,
+      modernize-*,
+      bugprone-*,
+      performance-*,
+      cppcoreguidelines-*,
+      readability-*
+    ]
+    Remove: [
+      readability-braces-around-statements,
+      bugprone-easily-swappable-parameters
+    ]
+    CheckOptions:
+      readability-identifier-naming.ClassCase: CamelCase
+      readability-identifier-naming.StructCase: CamelCase
+      readability-identifier-naming.EnumCase: CamelCase
+      readability-identifier-naming.EnumConstantCase: camelBack
+      readability-identifier-naming.FunctionCase: camelBack
+      readability-identifier-naming.VariableCase: lower_case
+      readability-identifier-naming.NamespaceCase: CamelCase
+      readability-identifier-naming.TypedefCase: CamelCase
+      readability-identifier-naming.TypeAliasCase: CamelCase
+      readability-identifier-naming.PrivateMemberCase: lower_case
+      readability-identifier-naming.PrivateMemberPrefix: m_
