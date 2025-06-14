@@ -22,9 +22,16 @@ auto main(int argc, char** argv) -> int {
       IPv4Address server_address{ip_address, port};
 
       client_socket.connectToServer(server_address);
-      client_socket.sendMessage("Hello from client.");
-
+      client_socket.sendMessage("Client connected.");
       std::cout << client_socket.receiveMessage(255) << '\n';
+
+      while (true) {
+         std::string message{client_socket.receiveMessage(255)};
+         std::cout << message << '\n';
+         if (message.find("start") != std::string::npos) {
+            break;
+         }
+      }
 
    } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';

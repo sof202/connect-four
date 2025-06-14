@@ -1,12 +1,35 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+#include <chrono>
 #include <cstring>
 #include <iostream>
+#include <mutex>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "network/address.hpp"
+#include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
+
+int connected_clients{};
+
+void handleClient(ClientSocket client_socket) {
+   std::cout << "New client connected.\n";
+
+   client_socket.sendMessage("Welcome to the game.");
+   std::mutex cout_mutex;
+   {
+      std::lock_guard<std::mutex> lock(cout_mutex);
+      std::cout << client_socket.receiveMessage(255) << '\n';
+   }
+   while (connected_clients < 2) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      client_socket.sendMessage("Waiting for other player...");
+   }
+   client_socket.sendMessage("start");
+}
 
 auto main(int argc, char** argv) -> int {
    if (argc != 3) {
@@ -25,14 +48,21 @@ auto main(int argc, char** argv) -> int {
       std::cout << "Server (ip: " << ip_address << ") listening on port "
                 << port << "...\n";
 
-      while (true) {
+      std::vector<std::thread> client_threads{};
+
+      for (int i{0}; i < 2; i++) {
          IPv4Address client_address{};
          ClientSocket client_socket{
              server_socket.acceptClient(client_address)};
-         std::cout << "Recieved message from client: "
-                   << client_socket.receiveMessage(255) << '\n';
-         client_socket.sendMessage("Hello from server");
+         connected_clients++;
+         client_threads.emplace_back(handleClient, std::move(client_socket));
       }
+
+      for (auto& thread : client_threads) {
+         if (thread.joinable()) thread.join();
+      }
+
+      std::cout << "Game ended...\n";
    } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';
    } catch (...) {

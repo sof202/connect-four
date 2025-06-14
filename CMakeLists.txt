@@ -42,10 +42,14 @@ set(NETWORK_HEADERS
     src/network/address.hpp
 )
 add_library(network_lib STATIC ${NETWORK_SOURCES} ${NETWORK_HEADERS})
+
 target_include_directories(network_lib
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(network_lib PRIVATE Threads::Threads)
 
 # ------------------
 # Build server
