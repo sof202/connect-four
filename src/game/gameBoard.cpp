@@ -39,6 +39,13 @@ auto Game::checkWin(int column_index, char symbol) -> bool {
           checkDiagonalWin(column_index, symbol);
 }
 
+auto Game::isFull() -> bool {
+   return std::ranges::none_of(
+       m_game_board | std::views::join, [](const auto& cell) {
+          return cell == Settings::background_character;
+       });
+}
+
 void Game::setup() {
    for (auto& column : m_game_board) {
       column.fill(Settings::background_character);
