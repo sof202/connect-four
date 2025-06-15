@@ -51,6 +51,28 @@ auto Game::isValidMove(std::size_t column_index) -> bool {
               Settings::background_character;
 }
 
+auto Game::countInDirection(Cell cell, Direction direction, char symbol)
+    -> int {
+   auto has_symbol{[&](Cell cell) {
+      return m_game_board.at(static_cast<std::size_t>(cell.col))
+                 .at(static_cast<std::size_t>(cell.row)) == symbol;
+   }};
+   auto in_range{[&](Cell cell) {
+      return static_cast<std::size_t>(cell.col) < Settings::board_columns &&
+             static_cast<std::size_t>(cell.row) < Settings::board_rows;
+   }};
+
+   int count{};
+   for (int i{1}; i < Settings::winning_vector_length; ++i) {
+      Cell to_check{.row = cell.row + (i * direction.x),
+                    .col = cell.col + (i * direction.y)};
+      if (!in_range(to_check)) break;
+      if (!has_symbol(to_check)) break;
+      ++count;
+   }
+   return count;
+}
+
 auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
    BoardColumn column{m_game_board.at(column_index)};
    auto first_match{
