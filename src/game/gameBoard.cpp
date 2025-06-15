@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <string>
 
@@ -50,6 +51,17 @@ auto Game::isValidMove(std::size_t column_index) -> bool {
               Settings::background_character;
 }
 
+auto Game::getTopCellWithSymbol(std::size_t column_index, char symbol)
+    -> std::optional<Cell> {
+   BoardColumn column{m_game_board.at(column_index)};
+   auto first_match{
+       std::ranges::find(std::ranges::reverse_view(column), symbol)};
+   if (first_match == column.rend()) return {};
+   int row_index{static_cast<int>(std::distance(first_match, column.rend())) -
+                 1};
+   return Cell{.row = row_index, .col = static_cast<int>(column_index)};
+}
+
 auto Game::countInDirection(Cell cell, Direction direction, char symbol)
     -> int {
    auto has_symbol{[&](Cell cell) {
@@ -73,22 +85,15 @@ auto Game::countInDirection(Cell cell, Direction direction, char symbol)
 }
 
 auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
-   BoardColumn column{m_game_board.at(column_index)};
-   auto first_match{
-       std::ranges::find(std::ranges::reverse_view(column), symbol)};
-   if (first_match == column.rend()) return false;
-   std::size_t row_index{
-       static_cast<std::size_t>(std::distance(first_match, column.rend())) -
-       1};
+   std::optional<Cell> top_cell_with_symbol{
+       getTopCellWithSymbol(column_index, symbol)};
+   if (!top_cell_with_symbol.has_value()) return false;
+
    int count{1};
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = 1, .y = 0},
-                             symbol);
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = -1, .y = 0},
-                             symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = 1, .y = 0}, symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = -1, .y = 0}, symbol);
    return count >= Settings::winning_vector_length;
 }
 
@@ -105,35 +110,23 @@ auto Game::checkColumnWin(std::size_t column_index, char symbol) -> bool {
 }
 
 auto Game::checkDiagonalWin(std::size_t column_index, char symbol) -> bool {
-   BoardColumn column{m_game_board.at(column_index)};
-   auto first_match{
-       std::ranges::find(std::ranges::reverse_view(column), symbol)};
-   if (first_match == column.rend()) return false;
-   std::size_t row_index{
-       static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
-
+   std::optional<Cell> top_cell_with_symbol{
+       getTopCellWithSymbol(column_index, symbol)};
+   if (!top_cell_with_symbol.has_value()) return false;
    // x=y line
    int count{1};
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = 1, .y = 1},
-                             symbol);
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = -1, .y = -1},
-                             symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = 1, .y = 1}, symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = -1, .y = -1}, symbol);
    if (count >= Settings::winning_vector_length) return true;
 
    // x=-y line
    count = 1;
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = 1, .y = -1},
-                             symbol);
-   count += countInDirection({.row = static_cast<int>(row_index),
-                              .col = static_cast<int>(column_index)},
-                             {.x = -1, .y = 1},
-                             symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = 1, .y = -1}, symbol);
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = -1, .y = 1}, symbol);
    return count >= Settings::winning_vector_length;
 }
 

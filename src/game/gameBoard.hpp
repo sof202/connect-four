@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <optional>
 #include <string>
 
 #include "game/gameSettings.hpp"
@@ -35,6 +36,8 @@ class Game {
    Board m_game_board{};
    void setup();
    auto isValidMove(std::size_t column_index) -> bool;
+   auto getTopCellWithSymbol(std::size_t column_index, char symbol)
+       -> std::optional<Cell>;
    auto countInDirection(Cell cell, Direction direction, char symbol) -> int;
    auto checkRowWin(std::size_t column_index, char symbol) -> bool;
    auto checkColumnWin(std::size_t column_index, char symbol) -> bool;
