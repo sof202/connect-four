@@ -98,15 +98,14 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
 }
 
 auto Game::checkColumnWin(std::size_t column_index, char symbol) -> bool {
-   BoardColumn column{m_game_board.at(column_index)};
-   auto first_match{
-       std::ranges::find(std::ranges::reverse_view(column), symbol)};
-   if (std::distance(first_match, column.rend()) <
-       Settings::winning_vector_length)
-      return false;
-   return std::all_of(first_match + 1,
-                      first_match + Settings::winning_vector_length,
-                      [symbol](char cell) { return cell == symbol; });
+   std::optional<Cell> top_cell_with_symbol{
+       getTopCellWithSymbol(column_index, symbol)};
+   if (!top_cell_with_symbol.has_value()) return false;
+   int count{1};
+   // Only need to look below as we have the top cell with symbol
+   count += countInDirection(
+       top_cell_with_symbol.value(), {.x = 0, .y = -1}, symbol);
+   return count >= Settings::winning_vector_length;
 }
 
 auto Game::checkDiagonalWin(std::size_t column_index, char symbol) -> bool {
