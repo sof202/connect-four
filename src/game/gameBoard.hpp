@@ -30,12 +30,12 @@ class Game {
    auto getBoard() -> std::string;
    void addPiece(std::size_t column_index, char symbol);
    auto checkWin(int column_index, char symbol) -> bool;
+   auto isValidMove(std::size_t column_index) -> bool;
    auto isFull() -> bool;
 
   private:
    Board m_game_board{};
    void setup();
-   auto isValidMove(std::size_t column_index) -> bool;
    auto getTopCellWithSymbol(int column_index, char symbol)
        -> std::optional<Cell>;
    auto countInDirection(Cell cell, Direction direction, char symbol) -> int;
