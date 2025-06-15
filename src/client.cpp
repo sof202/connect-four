@@ -2,6 +2,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <cstring>
 #include <exception>
@@ -26,9 +27,10 @@ auto main(int argc, char** argv) -> int {
       std::cout << client_socket.receiveMessage(255) << '\n';
 
       while (true) {
+         sleep(1);
          std::string message{client_socket.receiveMessage(255)};
          std::cout << message << '\n';
-         if (message.find("start") != std::string::npos) {
+         if (message.find("-") != std::string::npos) {
             break;
          }
       }

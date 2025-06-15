@@ -3,32 +3,38 @@
 
 #include <chrono>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
 
+#include "game/gameManager.hpp"
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
 
 int connected_clients{};
+std::mutex cout_mutex;
+std::mutex clients_mutex;
 
-void handleClient(ClientSocket client_socket) {
+void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
    std::cout << "New client connected.\n";
 
    client_socket.sendMessage("Welcome to the game.");
-   std::mutex cout_mutex;
    {
       std::lock_guard<std::mutex> lock(cout_mutex);
       std::cout << client_socket.receiveMessage(255) << '\n';
    }
-   while (connected_clients < 2) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      client_socket.sendMessage("Waiting for other player...");
+   game.addPlayer(std::move(client_socket));
+   while (true) {
+      {
+         std::lock_guard<std::mutex> lock(clients_mutex);
+         if (connected_clients >= 2) break;
+      }
    }
-   client_socket.sendMessage("start");
+   game.startGame();
 }
 
 auto main(int argc, char** argv) -> int {
@@ -49,13 +55,15 @@ auto main(int argc, char** argv) -> int {
                 << port << "...\n";
 
       std::vector<std::thread> client_threads{};
+      ConnectFour::GameManager game;
 
       for (int i{0}; i < 2; i++) {
          IPv4Address client_address{};
          ClientSocket client_socket{
              server_socket.acceptClient(client_address)};
          connected_clients++;
-         client_threads.emplace_back(handleClient, std::move(client_socket));
+         client_threads.emplace_back(
+             handleClient, std::move(client_socket), std::ref(game));
       }
 
       for (auto& thread : client_threads) {
