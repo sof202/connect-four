@@ -4,9 +4,13 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <exception>
 #include <iostream>
+#include <string>
+#include <thread>
 
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
@@ -27,11 +31,15 @@ auto main(int argc, char** argv) -> int {
       std::cout << client_socket.receiveMessage(255) << '\n';
 
       while (true) {
-         sleep(1);
+         std::this_thread::sleep_for(std::chrono::milliseconds(100));
          std::string message{client_socket.receiveMessage(255)};
+         if (message.empty()) continue;
          std::cout << message << '\n';
-         if (message.find("-") != std::string::npos) {
-            break;
+         if (message.find('!') != std::string::npos) return 0;
+         if (message.find("column") != std::string::npos) {
+            std::string buffer{};
+            std::cin >> buffer;
+            client_socket.sendMessage(buffer);
          }
       }
 

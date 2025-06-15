@@ -20,8 +20,10 @@ std::mutex cout_mutex;
 std::mutex clients_mutex;
 
 void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
-   std::cout << "New client connected.\n";
-
+   {
+      std::lock_guard<std::mutex> lock(cout_mutex);
+      std::cout << "New client connected.\n";
+   }
    client_socket.sendMessage("Welcome to the game.");
    {
       std::lock_guard<std::mutex> lock(cout_mutex);
@@ -35,6 +37,16 @@ void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
       }
    }
    game.startGame();
+   while (game.isGameActive()) {
+      {
+         std::lock_guard<std::mutex> lock(clients_mutex);
+         game.executePlayerMove();
+      }
+   }
+   {
+      std::lock_guard<std::mutex> lock(cout_mutex);
+      std::cout << "Game finished\n";
+   }
 }
 
 auto main(int argc, char** argv) -> int {

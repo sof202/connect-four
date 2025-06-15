@@ -52,6 +52,7 @@ auto GameManager::getPlayerMove() -> int {
          m_players[m_player_turn].sendMessage(
              "Provide a column to add your piece to\n");
          move = std::stoi(m_players[m_player_turn].receiveMessage(255));
+         break;
       } catch (const std::exception& e) {
          std::cerr << "Value entered was not an integer (" << e.what()
                    << ")\n";
@@ -71,15 +72,22 @@ void GameManager::executePlayerMove() {
    m_game.addPiece(static_cast<std::size_t>(move),
                    m_player_pieces[m_player_turn]);
    broadcastGameState();
-   if (m_game.checkWin(move, m_player_pieces[m_player_turn])) endGame();
+   if (m_game.isFull()) endGame(true);
+   if (m_game.checkWin(move, m_player_pieces[m_player_turn])) endGame(false);
    m_player_turn = (m_player_turn + 1) % 2;
 }
 
-void GameManager::endGame() {
-   std::size_t winning_player{m_player_turn};
-   std::size_t losing_player{(m_player_turn + 1) % 2};
-   m_players[winning_player].sendMessage("You won!\n");
-   m_players[losing_player].sendMessage("You lost!\n");
+void GameManager::endGame(bool draw) {
+   if (draw) {
+      for (const auto& player : m_players) {
+         player.sendMessage("You drew!\n");
+      }
+   } else {
+      std::size_t winning_player{m_player_turn};
+      std::size_t losing_player{(m_player_turn + 1) % 2};
+      m_players[winning_player].sendMessage("You won!\n");
+      m_players[losing_player].sendMessage("You lost!\n");
+   }
    m_game_active = false;
 }
 

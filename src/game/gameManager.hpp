@@ -24,7 +24,7 @@ class GameManager {
 
    void broadcastGameState();
    auto getPlayerMove() -> int;
-   void endGame();
+   void endGame(bool draw);
 };
 
 }  // namespace ConnectFour
