@@ -29,19 +29,19 @@ class Game {
    Game() { setup(); }
    auto getBoard() -> std::string;
    void addPiece(std::size_t column_index, char symbol);
-   auto checkWin(std::size_t column_index, char symbol) -> bool;
+   auto checkWin(int column_index, char symbol) -> bool;
    auto isFull() -> bool;
 
   private:
    Board m_game_board{};
    void setup();
    auto isValidMove(std::size_t column_index) -> bool;
-   auto getTopCellWithSymbol(std::size_t column_index, char symbol)
+   auto getTopCellWithSymbol(int column_index, char symbol)
        -> std::optional<Cell>;
    auto countInDirection(Cell cell, Direction direction, char symbol) -> int;
-   auto checkRowWin(std::size_t column_index, char symbol) -> bool;
-   auto checkColumnWin(std::size_t column_index, char symbol) -> bool;
-   auto checkDiagonalWin(std::size_t column_index, char symbol) -> bool;
+   auto checkRowWin(int column_index, char symbol) -> bool;
+   auto checkColumnWin(int column_index, char symbol) -> bool;
+   auto checkDiagonalWin(int column_index, char symbol) -> bool;
 };
 
 }  // namespace ConnectFour

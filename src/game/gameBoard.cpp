@@ -33,7 +33,7 @@ void Game::addPiece(std::size_t column_index, char symbol) {
    }
 }
 
-auto Game::checkWin(std::size_t column_index, char symbol) -> bool {
+auto Game::checkWin(int column_index, char symbol) -> bool {
    return checkColumnWin(column_index, symbol) ||
           checkRowWin(column_index, symbol) ||
           checkDiagonalWin(column_index, symbol);
@@ -51,15 +51,15 @@ auto Game::isValidMove(std::size_t column_index) -> bool {
               Settings::background_character;
 }
 
-auto Game::getTopCellWithSymbol(std::size_t column_index, char symbol)
+auto Game::getTopCellWithSymbol(int column_index, char symbol)
     -> std::optional<Cell> {
-   BoardColumn column{m_game_board.at(column_index)};
+   BoardColumn column{m_game_board.at(static_cast<std::size_t>(column_index))};
    auto first_match{
        std::ranges::find(std::ranges::reverse_view(column), symbol)};
    if (first_match == column.rend()) return {};
    int row_index{static_cast<int>(std::distance(first_match, column.rend())) -
                  1};
-   return Cell{.row = row_index, .col = static_cast<int>(column_index)};
+   return Cell{.row = row_index, .col = column_index};
 }
 
 auto Game::countInDirection(Cell cell, Direction direction, char symbol)
@@ -84,7 +84,7 @@ auto Game::countInDirection(Cell cell, Direction direction, char symbol)
    return count;
 }
 
-auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
+auto Game::checkRowWin(int column_index, char symbol) -> bool {
    std::optional<Cell> top_cell_with_symbol{
        getTopCellWithSymbol(column_index, symbol)};
    if (!top_cell_with_symbol.has_value()) return false;
@@ -97,7 +97,7 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
    return count >= Settings::winning_vector_length;
 }
 
-auto Game::checkColumnWin(std::size_t column_index, char symbol) -> bool {
+auto Game::checkColumnWin(int column_index, char symbol) -> bool {
    std::optional<Cell> top_cell_with_symbol{
        getTopCellWithSymbol(column_index, symbol)};
    if (!top_cell_with_symbol.has_value()) return false;
@@ -108,7 +108,7 @@ auto Game::checkColumnWin(std::size_t column_index, char symbol) -> bool {
    return count >= Settings::winning_vector_length;
 }
 
-auto Game::checkDiagonalWin(std::size_t column_index, char symbol) -> bool {
+auto Game::checkDiagonalWin(int column_index, char symbol) -> bool {
    std::optional<Cell> top_cell_with_symbol{
        getTopCellWithSymbol(column_index, symbol)};
    if (!top_cell_with_symbol.has_value()) return false;
