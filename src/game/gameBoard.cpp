@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iostream>
 #include <iterator>
 #include <ranges>
 #include <string>
@@ -64,10 +63,10 @@ auto Game::countInDirection(Cell cell, Direction direction, char symbol)
 
    int count{};
    for (int i{1}; i < Settings::winning_vector_length; ++i) {
-      Cell to_check{.row = cell.row + (i * direction.x),
-                    .col = cell.col + (i * direction.y)};
-      if (!in_range(to_check)) break;
-      if (!has_symbol(to_check)) break;
+      Cell cell_to_check{.row = cell.row + (i * direction.y),
+                         .col = cell.col + (i * direction.x)};
+      if (!in_range(cell_to_check)) break;
+      if (!has_symbol(cell_to_check)) break;
       ++count;
    }
    return count;
@@ -79,27 +78,17 @@ auto Game::checkRowWin(std::size_t column_index, char symbol) -> bool {
        std::ranges::find(std::ranges::reverse_view(column), symbol)};
    if (first_match == column.rend()) return false;
    std::size_t row_index{
-       static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
-   auto has_symbol{[&](std::size_t col) {
-      return col < Settings::board_columns &&
-             m_game_board.at(col).at(row_index) == symbol;
-   }};
-
+       static_cast<std::size_t>(std::distance(first_match, column.rend())) -
+       1};
    int count{1};
-   for (int col{static_cast<int>(column_index) - 1};
-        col >= 0 && has_symbol(static_cast<std::size_t>(col)) &&
-        count < Settings::winning_vector_length;
-        --col) {
-      count++;
-   }
-   if (count >= Settings::winning_vector_length) return true;
-
-   for (std::size_t col{column_index + 1};
-        col < Settings::board_columns && has_symbol(col) &&
-        count < Settings::winning_vector_length;
-        ++col) {
-      count++;
-   }
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = 1, .y = 0},
+                             symbol);
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = -1, .y = 0},
+                             symbol);
    return count >= Settings::winning_vector_length;
 }
 
@@ -123,48 +112,29 @@ auto Game::checkDiagonalWin(std::size_t column_index, char symbol) -> bool {
    std::size_t row_index{
        static_cast<size_t>(std::distance(first_match, column.rend())) - 1};
 
-   auto has_symbol{[&](std::size_t col, std::size_t row) {
-      return col < Settings::board_columns &&
-             m_game_board.at(col).at(row) == symbol;
-   }};
-   auto in_range{[&](std::size_t col, std::size_t row) {
-      return col < Settings::board_columns && row < Settings::board_rows;
-   }};
-
    // x=y line
    int count{1};
-   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
-      std::size_t col = column_index + i;
-      std::size_t row = row_index + i;
-      if (!in_range(col, row)) break;
-      if (!has_symbol(col, row)) break;
-      if (++count >= Settings::winning_vector_length) return true;
-   }
-   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
-      std::size_t col = column_index - i;
-      std::size_t row = row_index - i;
-      if (!in_range(col, row)) break;
-      if (!has_symbol(col, row)) break;
-      if (++count >= Settings::winning_vector_length) return true;
-   }
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = 1, .y = 1},
+                             symbol);
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = -1, .y = -1},
+                             symbol);
+   if (count >= Settings::winning_vector_length) return true;
 
    // x=-y line
    count = 1;
-   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
-      std::size_t col = column_index - i;
-      std::size_t row = row_index + i;
-      if (!in_range(col, row)) break;
-      if (!has_symbol(col, row)) break;
-      if (++count >= Settings::winning_vector_length) return true;
-   }
-   for (std::size_t i{1}; i < Settings::winning_vector_length; ++i) {
-      std::size_t col = column_index + i;
-      std::size_t row = row_index - i;
-      if (!in_range(col, row)) break;
-      if (!has_symbol(col, row)) break;
-      if (++count >= Settings::winning_vector_length) return true;
-   }
-   return false;
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = 1, .y = -1},
+                             symbol);
+   count += countInDirection({.row = static_cast<int>(row_index),
+                              .col = static_cast<int>(column_index)},
+                             {.x = -1, .y = 1},
+                             symbol);
+   return count >= Settings::winning_vector_length;
 }
 
 }  // namespace ConnectFour

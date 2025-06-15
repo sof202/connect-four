@@ -21,7 +21,7 @@ struct Cell {
 struct Direction {
    int x;
    int y;
-}
+};
 
 class Game {
   public:
