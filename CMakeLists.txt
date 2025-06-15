@@ -32,10 +32,12 @@ endif()
 # ------------------
 set(GAME_SOURCES
     src/game/gameBoard.cpp
+    src/game/gameManager.cpp
 )
 set(GAME_HEADERS
     src/game/gameSettings.hpp
     src/game/gameBoard.hpp
+    src/game/gameManager.hpp
 )
 add_library(game_lib STATIC ${GAME_SOURCES} ${GAME_HEADERS})
 target_include_directories(game_lib
