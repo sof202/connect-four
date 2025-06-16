@@ -89,11 +89,3 @@ add_executable(
 target_link_libraries(client PRIVATE network_lib)
 target_link_libraries(client PRIVATE game_lib)
 
-# ------------------
-# Build client
-# ------------------
-add_executable(
-    game_test
-    src/game_test.cpp
-)
-target_link_libraries(game_test PRIVATE game_lib)
