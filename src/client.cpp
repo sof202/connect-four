@@ -54,19 +54,18 @@ auto main(int argc, char** argv) -> int {
       client_socket.connectToServer(server_address);
       while (true) {
          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-         std::string message{client_socket.receiveMessage(255)};
-         if (message.empty()) continue;
-         if (message.find(ConnectFour::Settings::background_character) !=
-             std::string::npos)
-            std::cout << message;
-         if (message.find('!') != std::string::npos) {
-            std::cout << message;
+         auto message{client_socket.receiveMessage(255)};
+         if (message.first == MessageType::end) {
+            std::cout << message.second;
             return 0;
          }
-         if (message.find("column") != std::string::npos) {
-            int column_index{handleUserInput(message)};
+         if (message.second.empty()) continue;
+         if (message.first == MessageType::requestInput) {
+            int column_index{handleUserInput(message.second)};
             client_socket.sendMessage(MessageType::Type::move,
                                       std::to_string(column_index));
+         } else {
+            std::cout << message.second;
          }
       }
 

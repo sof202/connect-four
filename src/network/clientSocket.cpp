@@ -8,6 +8,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "network/address.hpp"
 
@@ -22,7 +23,7 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
 
 [[nodiscard]] auto ClientSocket::receiveMessage(std::size_t max_size,
                                                 int flags) const
-    -> std::string {
+    -> std::pair<MessageType::Type, std::string> {
    if (!isConnected()) {
       throw std::runtime_error("Socket is not connected.");
    }
@@ -40,7 +41,11 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
       }
    };
    buffer.resize(static_cast<std::size_t>(bytes_received));
-   return buffer;
+   std::size_t separator_position{buffer.find(':')};
+   std::string message{buffer.substr(separator_position + 1)};
+   MessageType::Type message_type{
+       MessageType::getTypeFromName(buffer.substr(0, separator_position))};
+   return {message_type, message};
 }
 
 void ClientSocket::sendMessage(MessageType::Type message_type,
@@ -50,7 +55,7 @@ void ClientSocket::sendMessage(MessageType::Type message_type,
       throw std::runtime_error("Socket is not connected.");
    }
    std::string message_with_type{
-       std::string(MessageType::getTypeName(message_type)) + " " + message};
+       std::string(MessageType::getTypeName(message_type)) + ":" + message};
    if (send(socketDescriptor(),
             message_with_type.c_str(),
             message_with_type.size(),

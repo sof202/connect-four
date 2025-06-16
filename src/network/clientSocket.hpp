@@ -57,8 +57,9 @@ class ClientSocket : public Socket {
 
    [[nodiscard]] auto isConnected() const -> bool { return m_is_connected; }
    void connectToServer(const IPv4Address& server_address);
+
    [[nodiscard]] auto receiveMessage(std::size_t max_size, int flags = 0) const
-       -> std::string;
+       -> std::pair<MessageType::Type, std::string>;
    void sendMessage(MessageType::Type message_type,
                     const std::string& message,
                     int flags = 0) const;

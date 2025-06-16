@@ -1,8 +1,9 @@
 #include "game/gameManager.hpp"
 
-#include <exception>
+#include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include "network/clientSocket.hpp"
 
@@ -43,13 +44,16 @@ void GameManager::broadcastGameState() {
                                "You are playing with the " +
                                    std::string(1, m_player_pieces[i]) +
                                    " pieces.\n");
+      // TODO: This is to avoid race condition where the info and the request
+      // Input are seen as the same message
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
    }
 }
 
 auto GameManager::getPlayerMove() -> int {
    m_players[m_player_turn].sendMessage(
        MessageType::requestInput, "Provide a column to add your piece to\n");
-   int move{std::stoi(m_players[m_player_turn].receiveMessage(255))};
+   int move{std::stoi(m_players[m_player_turn].receiveMessage(255).second)};
    return move;
 }
 
