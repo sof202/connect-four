@@ -65,7 +65,8 @@ auto main(int argc, char** argv) -> int {
          }
          if (message.find("column") != std::string::npos) {
             int column_index{handleUserInput(message)};
-            client_socket.sendMessage(std::to_string(column_index));
+            client_socket.sendMessage(MessageType::Type::move,
+                                      std::to_string(column_index));
          }
       }
 

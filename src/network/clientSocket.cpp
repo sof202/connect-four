@@ -4,46 +4,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <array>
 #include <cerrno>
-#include <cstdint>
 #include <cstring>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 
 #include "network/address.hpp"
-
-namespace MessageType {
-enum Type : std::uint8_t {
-   move,
-   board,
-   requestInput,
-   end,
-   info,
-   maxMessageType,
-};
-using namespace std::string_view_literals;
-constexpr std::array message_type_names{
-    "move"sv,
-    "board"sv,
-    "requestInput"sv,
-    "end"sv,
-    "info"sv,
-};
-static_assert(message_type_names.size() ==
-              static_cast<std::size_t>(maxMessageType));
-constexpr auto getTypeName(const Type& type) -> std::string_view {
-   return message_type_names.at(static_cast<std::size_t>(type));
-}
-constexpr auto getTypeFromName(std::string_view type_name) -> Type {
-   for (std::size_t idx{0}; idx < maxMessageType; ++idx) {
-      if (message_type_names.at(idx) == type_name)
-         return static_cast<Type>(idx);
-   }
-   return info;
-}
-}  // namespace MessageType
 
 void ClientSocket::connectToServer(const IPv4Address& server_address) {
    if (connect(socketDescriptor(), server_address, server_address.length()) <
@@ -77,11 +43,18 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
    return buffer;
 }
 
-void ClientSocket::sendMessage(const std::string& message, int flags) const {
+void ClientSocket::sendMessage(MessageType::Type message_type,
+                               const std::string& message,
+                               int flags) const {
    if (!isConnected()) {
       throw std::runtime_error("Socket is not connected.");
    }
-   if (send(socketDescriptor(), message.c_str(), message.size(), flags) < 0) {
+   std::string message_with_type{
+       std::string(MessageType::getTypeName(message_type)) + " " + message};
+   if (send(socketDescriptor(),
+            message_with_type.c_str(),
+            message_with_type.size(),
+            flags) < 0) {
       throw std::runtime_error("Error writing to socket + " +
                                std::string(strerror(errno)));
    }
