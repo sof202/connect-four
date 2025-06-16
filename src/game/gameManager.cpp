@@ -46,19 +46,9 @@ void GameManager::broadcastGameState() {
 }
 
 auto GameManager::getPlayerMove() -> int {
-   int move{};
-   while (true) {
-      try {
-         m_players[m_player_turn].sendMessage(
-             "Provide a column to add your piece to\n");
-         move = std::stoi(m_players[m_player_turn].receiveMessage(255));
-         break;
-      } catch (const std::exception& e) {
-         std::cerr << "Value entered was not an integer (" << e.what()
-                   << ")\n";
-         continue;
-      }
-   }
+   m_players[m_player_turn].sendMessage(
+       "Provide a column to add your piece to\n");
+   int move{std::stoi(m_players[m_player_turn].receiveMessage(255))};
    return move;
 }
 

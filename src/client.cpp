@@ -12,8 +12,34 @@
 #include <string>
 #include <thread>
 
+#include "game/gameSettings.hpp"
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
+
+void ignoreLine() {
+   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
+auto handleUserInput(const std::string& input_message) -> int {
+   int user_response{};
+   while (true) {
+      std::cout << input_message;
+      std::cin >> user_response;
+      if (!std::cin) {
+         std::cin.clear();
+         ignoreLine();
+         continue;
+      }
+      if (static_cast<std::size_t>(user_response) >
+              ConnectFour::Settings::board_columns ||
+          user_response < 0) {
+         ignoreLine();
+         std::cout << "Invalid value, index out of range.\n";
+         continue;
+      }
+      return user_response;
+   }
+}
 
 auto main(int argc, char** argv) -> int {
    if (argc != 3) {
@@ -25,21 +51,21 @@ auto main(int argc, char** argv) -> int {
    try {
       ClientSocket client_socket{AF_INET, SOCK_STREAM};
       IPv4Address server_address{ip_address, port};
-
       client_socket.connectToServer(server_address);
-      client_socket.sendMessage("Client connected.");
-      std::cout << client_socket.receiveMessage(255) << '\n';
-
       while (true) {
          std::this_thread::sleep_for(std::chrono::milliseconds(100));
          std::string message{client_socket.receiveMessage(255)};
          if (message.empty()) continue;
-         std::cout << message << '\n';
-         if (message.find('!') != std::string::npos) return 0;
+         if (message.find(ConnectFour::Settings::background_character) !=
+             std::string::npos)
+            std::cout << message;
+         if (message.find('!') != std::string::npos) {
+            std::cout << message;
+            return 0;
+         }
          if (message.find("column") != std::string::npos) {
-            std::string buffer{};
-            std::cin >> buffer;
-            client_socket.sendMessage(buffer);
+            int column_index{handleUserInput(message)};
+            client_socket.sendMessage(std::to_string(column_index));
          }
       }
 

@@ -24,11 +24,6 @@ void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
       std::lock_guard<std::mutex> lock(cout_mutex);
       std::cout << "New client connected.\n";
    }
-   client_socket.sendMessage("Welcome to the game.");
-   {
-      std::lock_guard<std::mutex> lock(cout_mutex);
-      std::cout << client_socket.receiveMessage(255) << '\n';
-   }
    game.addPlayer(std::move(client_socket));
    while (true) {
       {
