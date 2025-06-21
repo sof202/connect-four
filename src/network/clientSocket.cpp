@@ -27,19 +27,18 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
       throw std::runtime_error("Socket is not connected.");
    }
 
-   std::string buffer(max_size, '\0');
-   ssize_t bytes_received{};
-   while (true) {
-      bytes_received =
-          recv(socketDescriptor(), buffer.data(), buffer.size(), flags);
-      if (bytes_received >= 0) break;
+   uint32_t length{};
+   ssize_t bytes_received{
+       recv(socketDescriptor(), &length, sizeof(length), flags)};
+   if (bytes_received < 0) throw std::runtime_error("Connection closed.");
+   length = ntohl(length);
+   if (length > max_size) throw std::runtime_error("Message too large.");
 
-      if (errno != EINTR) {
-         throw std::runtime_error("Error recieving from socket: " +
-                                  std::string(strerror(errno)));
-      }
-   };
-   buffer.resize(static_cast<std::size_t>(bytes_received));
+   std::string buffer(length, '\0');
+   bytes_received =
+       recv(socketDescriptor(), buffer.data(), buffer.size(), flags);
+   if (bytes_received < 0) throw std::runtime_error("Connection closed.");
+
    return Message::fromString(buffer);
 }
 
@@ -48,8 +47,15 @@ void ClientSocket::sendMessage(const Message& message, int flags) const {
       throw std::runtime_error("Socket is not connected.");
    }
    std::string to_send{message.asString()};
+   uint32_t length{htonl(static_cast<uint32_t>(to_send.size()))};
+
+   if (send(socketDescriptor(), &length, sizeof(length), flags) < 0) {
+      throw std::runtime_error("Error writing length to socket + " +
+                               std::string(strerror(errno)));
+   }
+
    if (send(socketDescriptor(), to_send.c_str(), to_send.size(), flags) < 0) {
-      throw std::runtime_error("Error writing to socket + " +
+      throw std::runtime_error("Error writing message to socket + " +
                                std::string(strerror(errno)));
    }
 }
