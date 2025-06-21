@@ -11,6 +11,7 @@
 namespace ConnectFour {
 class GameManager {
   public:
+   GameManager() = default;
    [[nodiscard]] auto isGameActive() const -> bool { return m_game_active; }
    void addPlayer(ClientSocket player);
    auto connectedPlayers() -> int {
@@ -25,10 +26,10 @@ class GameManager {
    bool m_game_active{false};
    std::size_t m_player_turn{0};
    std::vector<char> m_player_pieces{'0', 'x'};
-   Game m_game{};
-   std::vector<ClientSocket> m_players{};
-   std::mutex m_logging_mutex{};
-   std::mutex m_player_mutex{};
+   Game m_game;
+   std::vector<ClientSocket> m_players;
+   std::mutex m_logging_mutex;
+   std::mutex m_player_mutex;
 
    auto getPlayerMove() -> int;
    void endGame(bool draw);

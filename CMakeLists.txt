@@ -14,7 +14,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Dev") 
-add_compile_options(-ggdb -pedantic-errors -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -Werror)
+add_compile_options(-ggdb -pedantic-errors -Wall -Wextra -Wconversion -Wsign-conversion -Werror)
 endif()
 
 add_compile_definitions(BUILD_TYPE="${CMAKE_BUILD_TYPE}")
