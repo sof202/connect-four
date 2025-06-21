@@ -41,6 +41,29 @@ auto handleUserInput(const std::string& input_message) -> int {
    }
 }
 
+auto handleMessage(const Message& message, const ClientSocket& client_socket)
+    -> bool {
+   switch (message.messageType()) {
+      case MessageType::info:
+      case MessageType::board: {
+         std::cout << message.messageText();
+         return true;
+      }
+      case MessageType::end: {
+         std::cout << message.messageText();
+         return false;
+      }
+      case MessageType::requestInput: {
+         int column_index{handleUserInput(message.messageText())};
+         client_socket.sendMessage(
+             {MessageType::Type::move, std::to_string(column_index)});
+         return true;
+      }
+      default:
+         return true;
+   }
+}
+
 auto main(int argc, char** argv) -> int {
    if (argc != 3) {
       std::cerr << "Usage: " << argv[0] << "ip_address port\n";
@@ -55,18 +78,8 @@ auto main(int argc, char** argv) -> int {
       while (true) {
          std::this_thread::sleep_for(std::chrono::milliseconds(100));
          Message message{client_socket.receiveMessage(255)};
-         if (message.messageType() == MessageType::end) {
-            std::cout << message.messageText();
-            return 0;
-         }
          if (message.messageText().empty()) continue;
-         if (message.messageType() == MessageType::requestInput) {
-            int column_index{handleUserInput(message.messageText())};
-            client_socket.sendMessage(
-                {MessageType::Type::move, std::to_string(column_index)});
-         } else {
-            std::cout << message.messageText();
-         }
+         if (!handleMessage(message, client_socket)) break;
       }
 
    } catch (const std::exception& e) {
