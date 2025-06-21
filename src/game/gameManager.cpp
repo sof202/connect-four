@@ -39,7 +39,6 @@ void GameManager::startGame() {
       return;
    }
    m_game_active = true;
-   broadcastGameState();
 }
 
 void GameManager::broadcastGameState() {
@@ -74,7 +73,6 @@ void GameManager::executePlayerMove() {
    }
    m_game.addPiece(static_cast<std::size_t>(move),
                    m_player_pieces[m_player_turn]);
-   broadcastGameState();
    if (m_game.isFull()) endGame(true);
    if (m_game.checkWin(move, m_player_pieces[m_player_turn])) endGame(false);
    m_player_turn = (m_player_turn + 1) % 2;

@@ -56,6 +56,7 @@ auto main(int argc, char** argv) -> int {
 
       game.startGame();
       while (game.isGameActive()) {
+         game.broadcastGameState();
          game.executePlayerMove();
       }
       game.log("Game finished.");

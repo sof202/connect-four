@@ -19,6 +19,7 @@ class GameManager {
    void startGame();
    void executePlayerMove();
    void log(const std::string& message);
+   void broadcastGameState();
 
   private:
    bool m_game_active{false};
@@ -29,7 +30,6 @@ class GameManager {
    std::mutex m_logging_mutex{};
    std::mutex m_player_mutex{};
 
-   void broadcastGameState();
    auto getPlayerMove() -> int;
    void endGame(bool draw);
 };
