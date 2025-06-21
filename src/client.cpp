@@ -4,12 +4,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <chrono>
 #include <cstring>
 #include <exception>
 #include <iostream>
+#include <limits>
 #include <string>
-#include <thread>
 
 #include "game/gameSettings.hpp"
 #include "network/address.hpp"
@@ -76,9 +75,7 @@ auto main(int argc, char** argv) -> int {
       IPv4Address server_address{ip_address, port};
       client_socket.connectToServer(server_address);
       while (true) {
-         std::this_thread::sleep_for(std::chrono::milliseconds(100));
          Message message{client_socket.receiveMessage(255)};
-         if (message.messageText().empty()) continue;
          if (!handleMessage(message, client_socket)) break;
       }
 
