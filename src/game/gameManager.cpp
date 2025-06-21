@@ -68,6 +68,7 @@ auto GameManager::getPlayerMove() -> int {
 }
 
 void GameManager::executePlayerMove() {
+   std::lock_guard<std::mutex> lock(m_move_mutex);
    int move{};
    while (true) {
       move = getPlayerMove();

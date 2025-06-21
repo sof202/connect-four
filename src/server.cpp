@@ -15,8 +15,6 @@
 #include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
 
-std::mutex clients_mutex;
-
 void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
    game.addPlayer(std::move(client_socket));
    while (game.connectedPlayers() < 2) {
@@ -25,10 +23,7 @@ void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
    }
    game.startGame();
    while (game.isGameActive()) {
-      {
-         std::lock_guard<std::mutex> lock(clients_mutex);
-         game.executePlayerMove();
-      }
+      game.executePlayerMove();
    }
    game.log("Game finished.");
 }
