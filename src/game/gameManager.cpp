@@ -53,9 +53,6 @@ void GameManager::broadcastGameState() {
                                 "You are playing with the " +
                                     std::string(1, m_player_pieces[i]) +
                                     " pieces.\n"});
-      // TODO: This is to avoid race condition where the info and the request
-      // Input are seen as the same message
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
    }
 }
 
