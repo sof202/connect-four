@@ -15,7 +15,6 @@
 #include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
 
-int connected_clients{};
 std::mutex cout_mutex;
 std::mutex clients_mutex;
 
@@ -25,10 +24,12 @@ void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
       std::cout << "New client connected.\n";
    }
    game.addPlayer(std::move(client_socket));
-   while (true) {
+   while (game.connectedPlayers() < 2) {
       {
-         std::lock_guard<std::mutex> lock(clients_mutex);
-         if (connected_clients >= 2) break;
+         std::this_thread::sleep_for(std::chrono::seconds(2));
+         std::lock_guard<std::mutex> lock(cout_mutex);
+         std::cout << "Wating for both players to join ("
+                   << game.connectedPlayers() << " players have joined)...\n";
       }
    }
    game.startGame();
@@ -68,7 +69,6 @@ auto main(int argc, char** argv) -> int {
          IPv4Address client_address{};
          ClientSocket client_socket{
              server_socket.acceptClient(client_address)};
-         connected_clients++;
          client_threads.emplace_back(
              handleClient, std::move(client_socket), std::ref(game));
       }

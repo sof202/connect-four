@@ -12,6 +12,9 @@ class GameManager {
   public:
    [[nodiscard]] auto isGameActive() const -> bool { return m_game_active; }
    void addPlayer(ClientSocket player);
+   auto connectedPlayers() -> int {
+      return static_cast<int>(m_players.size());
+   }
    void startGame();
    void executePlayerMove();
 
