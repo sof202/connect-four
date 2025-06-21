@@ -1,10 +1,8 @@
 #include "game/gameManager.hpp"
 
-#include <chrono>
 #include <iostream>
 #include <mutex>
 #include <string>
-#include <thread>
 
 #include "network/clientSocket.hpp"
 #include "network/message.hpp"
@@ -25,6 +23,8 @@ void GameManager::addPlayer(ClientSocket player) {
       return;
    }
    std::lock_guard<std::mutex> lock(m_player_mutex);
+   player.sendMessage(
+       {MessageType::info, "Welcome, waiting for other player.\n"});
    m_players.push_back(std::move(player));
    log("New client connected.");
 }
@@ -65,7 +65,6 @@ auto GameManager::getPlayerMove() -> int {
 }
 
 void GameManager::executePlayerMove() {
-   std::lock_guard<std::mutex> lock(m_move_mutex);
    int move{};
    while (true) {
       move = getPlayerMove();

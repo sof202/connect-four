@@ -5,7 +5,6 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
-#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -18,14 +17,9 @@
 void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
    game.addPlayer(std::move(client_socket));
    while (game.connectedPlayers() < 2) {
-      std::this_thread::sleep_for(std::chrono::seconds(2));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       game.log("Wating for both players to join...");
    }
-   game.startGame();
-   while (game.isGameActive()) {
-      game.executePlayerMove();
-   }
-   game.log("Game finished.");
 }
 
 auto main(int argc, char** argv) -> int {
@@ -59,6 +53,12 @@ auto main(int argc, char** argv) -> int {
       for (auto& thread : client_threads) {
          if (thread.joinable()) thread.join();
       }
+
+      game.startGame();
+      while (game.isGameActive()) {
+         game.executePlayerMove();
+      }
+      game.log("Game finished.");
 
       std::cout << "Game ended...\n";
    } catch (const std::exception& e) {
