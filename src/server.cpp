@@ -18,7 +18,6 @@
 std::mutex clients_mutex;
 
 void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
-   game.log("New client connected.");
    game.addPlayer(std::move(client_socket));
    while (game.connectedPlayers() < 2) {
       std::this_thread::sleep_for(std::chrono::seconds(2));

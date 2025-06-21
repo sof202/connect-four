@@ -25,6 +25,7 @@ void GameManager::addPlayer(ClientSocket player) {
       return;
    }
    m_players.push_back(std::move(player));
+   log("New client connected.");
 }
 
 void GameManager::startGame() {
