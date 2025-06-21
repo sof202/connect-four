@@ -24,6 +24,7 @@ void GameManager::addPlayer(ClientSocket player) {
       std::cerr << "Warning: Game already has 2 players, skipping...\n";
       return;
    }
+   std::lock_guard<std::mutex> lock(m_player_mutex);
    m_players.push_back(std::move(player));
    log("New client connected.");
 }

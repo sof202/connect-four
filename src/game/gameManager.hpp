@@ -27,6 +27,7 @@ class GameManager {
    Game m_game{};
    std::vector<ClientSocket> m_players{};
    std::mutex m_logging_mutex{};
+   std::mutex m_player_mutex{};
 
    void broadcastGameState();
    auto getPlayerMove() -> int;
