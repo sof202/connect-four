@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "network/clientSocket.hpp"
+#include "network/message.hpp"
 
 namespace ConnectFour {
 void GameManager::addPlayer(ClientSocket player) {
@@ -39,11 +40,11 @@ void GameManager::broadcastGameState() {
       return;
    }
    for (std::size_t i{}; i < m_players.size(); ++i) {
-      m_players[i].sendMessage(MessageType::board, m_game.getBoard());
-      m_players[i].sendMessage(MessageType::info,
-                               "You are playing with the " +
-                                   std::string(1, m_player_pieces[i]) +
-                                   " pieces.\n");
+      m_players[i].sendMessage({MessageType::board, m_game.getBoard()});
+      m_players[i].sendMessage({MessageType::info,
+                                "You are playing with the " +
+                                    std::string(1, m_player_pieces[i]) +
+                                    " pieces.\n"});
       // TODO: This is to avoid race condition where the info and the request
       // Input are seen as the same message
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -52,8 +53,9 @@ void GameManager::broadcastGameState() {
 
 auto GameManager::getPlayerMove() -> int {
    m_players[m_player_turn].sendMessage(
-       MessageType::requestInput, "Provide a column to add your piece to\n");
-   int move{std::stoi(m_players[m_player_turn].receiveMessage(255).second)};
+       {MessageType::requestInput, "Provide a column to add your piece to\n"});
+   int move{
+       std::stoi(m_players[m_player_turn].receiveMessage(255).messageText())};
    return move;
 }
 
@@ -62,8 +64,8 @@ void GameManager::executePlayerMove() {
    while (true) {
       move = getPlayerMove();
       if (m_game.isValidMove(static_cast<std::size_t>(move))) break;
-      m_players[m_player_turn].sendMessage(MessageType::info,
-                                           "That move is invalid.\n");
+      m_players[m_player_turn].sendMessage(
+          {MessageType::info, "That move is invalid.\n"});
    }
    m_game.addPiece(static_cast<std::size_t>(move),
                    m_player_pieces[m_player_turn]);
@@ -76,13 +78,13 @@ void GameManager::executePlayerMove() {
 void GameManager::endGame(bool draw) {
    if (draw) {
       for (const auto& player : m_players) {
-         player.sendMessage(MessageType::end, "You drew!\n");
+         player.sendMessage({MessageType::end, "You drew!\n"});
       }
    } else {
       std::size_t winning_player{m_player_turn};
       std::size_t losing_player{(m_player_turn + 1) % 2};
-      m_players[winning_player].sendMessage(MessageType::end, "You won!\n");
-      m_players[losing_player].sendMessage(MessageType::end, "You lost!\n");
+      m_players[winning_player].sendMessage({MessageType::end, "You won!\n"});
+      m_players[losing_player].sendMessage({MessageType::end, "You lost!\n"});
    }
    m_game_active = false;
 }

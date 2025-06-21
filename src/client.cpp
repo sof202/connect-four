@@ -4,7 +4,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <exception>
@@ -15,6 +14,7 @@
 #include "game/gameSettings.hpp"
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
+#include "network/message.hpp"
 
 void ignoreLine() {
    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -54,18 +54,18 @@ auto main(int argc, char** argv) -> int {
       client_socket.connectToServer(server_address);
       while (true) {
          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-         auto message{client_socket.receiveMessage(255)};
-         if (message.first == MessageType::end) {
-            std::cout << message.second;
+         Message message{client_socket.receiveMessage(255)};
+         if (message.messageType() == MessageType::end) {
+            std::cout << message.messageText();
             return 0;
          }
-         if (message.second.empty()) continue;
-         if (message.first == MessageType::requestInput) {
-            int column_index{handleUserInput(message.second)};
-            client_socket.sendMessage(MessageType::Type::move,
-                                      std::to_string(column_index));
+         if (message.messageText().empty()) continue;
+         if (message.messageType() == MessageType::requestInput) {
+            int column_index{handleUserInput(message.messageText())};
+            client_socket.sendMessage(
+                {MessageType::Type::move, std::to_string(column_index)});
          } else {
-            std::cout << message.second;
+            std::cout << message.messageText();
          }
       }
 

@@ -8,9 +8,9 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
-#include <utility>
 
 #include "network/address.hpp"
+#include "network/message.hpp"
 
 void ClientSocket::connectToServer(const IPv4Address& server_address) {
    if (connect(socketDescriptor(), server_address, server_address.length()) <
@@ -22,8 +22,7 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
 }
 
 [[nodiscard]] auto ClientSocket::receiveMessage(std::size_t max_size,
-                                                int flags) const
-    -> std::pair<MessageType::Type, std::string> {
+                                                int flags) const -> Message {
    if (!isConnected()) {
       throw std::runtime_error("Socket is not connected.");
    }
@@ -41,25 +40,15 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
       }
    };
    buffer.resize(static_cast<std::size_t>(bytes_received));
-   std::size_t separator_position{buffer.find(':')};
-   std::string message{buffer.substr(separator_position + 1)};
-   MessageType::Type message_type{
-       MessageType::getTypeFromName(buffer.substr(0, separator_position))};
-   return {message_type, message};
+   return Message::fromString(buffer);
 }
 
-void ClientSocket::sendMessage(MessageType::Type message_type,
-                               const std::string& message,
-                               int flags) const {
+void ClientSocket::sendMessage(const Message& message, int flags) const {
    if (!isConnected()) {
       throw std::runtime_error("Socket is not connected.");
    }
-   std::string message_with_type{
-       std::string(MessageType::getTypeName(message_type)) + ":" + message};
-   if (send(socketDescriptor(),
-            message_with_type.c_str(),
-            message_with_type.size(),
-            flags) < 0) {
+   std::string to_send{message.asString()};
+   if (send(socketDescriptor(), to_send.c_str(), to_send.size(), flags) < 0) {
       throw std::runtime_error("Error writing to socket + " +
                                std::string(strerror(errno)));
    }
