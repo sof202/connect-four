@@ -2,6 +2,7 @@
 #define GAME_MANAGER_H_
 
 #include <cstddef>
+#include <mutex>
 #include <vector>
 
 #include "game/gameBoard.hpp"
@@ -17,6 +18,7 @@ class GameManager {
    }
    void startGame();
    void executePlayerMove();
+   void log(const std::string& message);
 
   private:
    bool m_game_active{false};
@@ -24,6 +26,7 @@ class GameManager {
    std::vector<char> m_player_pieces{'0', 'x'};
    Game m_game{};
    std::vector<ClientSocket> m_players{};
+   std::mutex m_logging_mutex{};
 
    void broadcastGameState();
    auto getPlayerMove() -> int;

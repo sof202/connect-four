@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -9,6 +10,11 @@
 #include "network/message.hpp"
 
 namespace ConnectFour {
+void GameManager::log(const std::string& message) {
+   std::lock_guard<std::mutex> lock(m_logging_mutex);
+   std::cout << message << '\n';
+}
+
 void GameManager::addPlayer(ClientSocket player) {
    if (m_game_active) {
       std::cerr << "Warning: Game already started.\n";

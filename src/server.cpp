@@ -15,22 +15,14 @@
 #include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
 
-std::mutex cout_mutex;
 std::mutex clients_mutex;
 
 void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
-   {
-      std::lock_guard<std::mutex> lock(cout_mutex);
-      std::cout << "New client connected.\n";
-   }
+   game.log("New client connected.");
    game.addPlayer(std::move(client_socket));
    while (game.connectedPlayers() < 2) {
-      {
-         std::this_thread::sleep_for(std::chrono::seconds(2));
-         std::lock_guard<std::mutex> lock(cout_mutex);
-         std::cout << "Wating for both players to join ("
-                   << game.connectedPlayers() << " players have joined)...\n";
-      }
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+      game.log("Wating for both players to join...");
    }
    game.startGame();
    while (game.isGameActive()) {
@@ -39,10 +31,7 @@ void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
          game.executePlayerMove();
       }
    }
-   {
-      std::lock_guard<std::mutex> lock(cout_mutex);
-      std::cout << "Game finished\n";
-   }
+   game.log("Game finished.");
 }
 
 auto main(int argc, char** argv) -> int {
