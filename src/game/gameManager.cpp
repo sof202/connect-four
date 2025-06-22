@@ -6,6 +6,7 @@
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/message.hpp"
+#include "network/networkException.hpp"
 
 namespace ConnectFour {
 
@@ -87,12 +88,17 @@ void GameManager::endGame(bool draw) {
 }
 
 void GameManager::gameLoop() {
-   broadcastGameState();
-   int move{getPlayerMove()};
-   m_game.addPiece(static_cast<std::size_t>(move),
-                   m_player_pieces[m_player_turn]);
-   checkGameEnd(move);
-   updatePlayer();
+   try {
+      broadcastGameState();
+      int move{getPlayerMove()};
+      m_game.addPiece(static_cast<std::size_t>(move),
+                      m_player_pieces[m_player_turn]);
+      checkGameEnd(move);
+      updatePlayer();
+   } catch (const SocketDisconnectException& e) {
+      std::cerr << "Player " << m_player_turn << " disconnected.\n";
+      throw;
+   }
 }
 
 }  // namespace ConnectFour
