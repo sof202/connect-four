@@ -19,7 +19,6 @@ class GameManager {
       return static_cast<int>(m_players.size());
    }
    void initialise();
-   void log(const std::string& message);
    void gameLoop();
 
   private:
@@ -29,7 +28,6 @@ class GameManager {
    std::vector<char> m_player_pieces{'0', 'x'};
    Game m_game;
    std::vector<ClientSocket> m_players;
-   std::mutex m_logging_mutex;
    std::mutex m_player_mutex;
 
    void endGame(bool draw);

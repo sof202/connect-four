@@ -33,7 +33,7 @@ auto main(int argc, char** argv) -> int {
       while (game.isGameActive()) {
          game.gameLoop();
       }
-      game.log("Game finished.");
+      std::cout << "Game finished.\n";
 
    } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';

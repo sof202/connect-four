@@ -9,10 +9,6 @@
 #include "network/message.hpp"
 
 namespace ConnectFour {
-void GameManager::log(const std::string& message) {
-   std::lock_guard<std::mutex> lock(m_logging_mutex);
-   std::cout << message << '\n';
-}
 
 void GameManager::addPlayer(ClientSocket player) {
    if (m_game_active) {
@@ -27,7 +23,7 @@ void GameManager::addPlayer(ClientSocket player) {
    player.sendMessage(
        {MessageType::info, "Welcome, waiting for other player.\n"});
    m_players.push_back(std::move(player));
-   log("New client connected.");
+   std::cout << "New client connected.\n";
 }
 
 void GameManager::initialise() {
