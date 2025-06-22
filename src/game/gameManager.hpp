@@ -18,9 +18,8 @@ class GameManager {
       return static_cast<int>(m_players.size());
    }
    void startGame();
-   void executePlayerMove();
    void log(const std::string& message);
-   void broadcastGameState();
+   void gameLoop();
 
   private:
    bool m_game_active{false};
@@ -31,8 +30,11 @@ class GameManager {
    std::mutex m_logging_mutex;
    std::mutex m_player_mutex;
 
-   auto getPlayerMove() -> int;
    void endGame(bool draw);
+   void broadcastGameState();
+   void checkGameEnd(int move);
+   void updatePlayer() { m_player_turn = (m_player_turn + 1) % 2; }
+   auto getPlayerMove() -> int;
 };
 
 }  // namespace ConnectFour

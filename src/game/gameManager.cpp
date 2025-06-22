@@ -56,29 +56,27 @@ void GameManager::broadcastGameState() {
 }
 
 auto GameManager::getPlayerMove() -> int {
-   m_players[m_player_turn].sendMessage(
-       {MessageType::requestInput, "Provide a column to add your piece to\n"});
-   int move{
-       std::stoi(m_players[m_player_turn].receiveMessage(255).messageText())};
-   return move;
-}
-
-void GameManager::executePlayerMove() {
    int move{};
    while (true) {
-      move = getPlayerMove();
+      m_players[m_player_turn].sendMessage(
+          {MessageType::requestInput,
+           "Provide a column to add your piece to\n"});
+      move = std::stoi(
+          m_players[m_player_turn].receiveMessage(255).messageText());
       if (m_game.isValidMove(static_cast<std::size_t>(move))) break;
       m_players[m_player_turn].sendMessage(
           {MessageType::info, "That move is invalid.\n"});
    }
-   m_game.addPiece(static_cast<std::size_t>(move),
-                   m_player_pieces[m_player_turn]);
+   return move;
+}
+
+void GameManager::checkGameEnd(int move) {
    if (m_game.isFull()) endGame(true);
    if (m_game.checkWin(move, m_player_pieces[m_player_turn])) endGame(false);
-   m_player_turn = (m_player_turn + 1) % 2;
 }
 
 void GameManager::endGame(bool draw) {
+   broadcastGameState();
    if (draw) {
       for (const auto& player : m_players) {
          player.sendMessage({MessageType::end, "You drew!\n"});
@@ -90,6 +88,15 @@ void GameManager::endGame(bool draw) {
       m_players[losing_player].sendMessage({MessageType::end, "You lost!\n"});
    }
    m_game_active = false;
+}
+
+void GameManager::gameLoop() {
+   broadcastGameState();
+   int move{getPlayerMove()};
+   m_game.addPiece(static_cast<std::size_t>(move),
+                   m_player_pieces[m_player_turn]);
+   checkGameEnd(move);
+   updatePlayer();
 }
 
 }  // namespace ConnectFour
