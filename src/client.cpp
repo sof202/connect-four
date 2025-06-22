@@ -44,8 +44,7 @@ auto handleUserInput(const std::string& input_message) -> int {
 auto handleMessage(const Message& message, const ClientSocket& client_socket)
     -> bool {
    switch (message.messageType()) {
-      case MessageType::info:
-      case MessageType::board: {
+      case MessageType::info: {
          std::cout << message.messageText();
          return true;
       }

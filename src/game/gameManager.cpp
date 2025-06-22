@@ -47,7 +47,7 @@ void GameManager::broadcastGameState() {
       return;
    }
    for (std::size_t i{}; i < m_players.size(); ++i) {
-      m_players[i].sendMessage({MessageType::board, m_game.getBoard()});
+      m_players[i].sendMessage({MessageType::info, m_game.getBoard()});
       m_players[i].sendMessage({MessageType::info,
                                 "You are playing with the " +
                                     std::string(1, m_player_pieces[i]) +

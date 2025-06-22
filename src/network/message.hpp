@@ -8,7 +8,6 @@
 namespace MessageType {
 enum Type : std::uint8_t {
    move,
-   board,
    requestInput,
    end,
    info,
@@ -17,7 +16,6 @@ enum Type : std::uint8_t {
 using namespace std::string_view_literals;
 constexpr std::array message_type_names{
     "move"sv,
-    "board"sv,
     "requestInput"sv,
     "end"sv,
     "info"sv,
