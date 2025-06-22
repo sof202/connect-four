@@ -1,7 +1,6 @@
 #include "game/gameManager.hpp"
 
 #include <iostream>
-#include <mutex>
 #include <string>
 
 #include "network/address.hpp"
@@ -19,7 +18,6 @@ void GameManager::addPlayer(ClientSocket player) {
       std::cerr << "Warning: Game already has 2 players, skipping...\n";
       return;
    }
-   std::lock_guard<std::mutex> lock(m_player_mutex);
    player.sendMessage(
        {MessageType::info, "Welcome, waiting for other player.\n"});
    m_players.push_back(std::move(player));
