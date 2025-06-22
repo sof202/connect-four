@@ -33,6 +33,8 @@ class GameManager {
    void checkGameEnd(int move);
    void updatePlayer() { m_player_turn = (m_player_turn + 1) % 2; }
    auto getPlayerMove() -> int;
+   void handleDisconnect(int disconnected_socket_descriptor,
+                         int reconnect_wait_time_seconds = 30);
 };
 
 }  // namespace ConnectFour

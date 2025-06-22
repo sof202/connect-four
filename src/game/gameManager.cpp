@@ -1,6 +1,9 @@
 #include "game/gameManager.hpp"
 
+#include <algorithm>
 #include <iostream>
+#include <iterator>
+#include <stdexcept>
 #include <string>
 
 #include "network/address.hpp"
@@ -87,6 +90,38 @@ void GameManager::endGame(bool draw) {
    m_game_active = false;
 }
 
+void GameManager::handleDisconnect(int disconnected_socket_descriptor,
+                                   int reconnect_wait_time_seconds) {
+   auto disconnected_player{
+       std::ranges::find(m_players,
+                         disconnected_socket_descriptor,
+                         &ClientSocket::socketDescriptor)};
+   if (disconnected_player == m_players.end()) {
+      throw NetworkException(
+          "Could not find disconnected player in player list");
+   }
+
+   std::size_t player_index{static_cast<std::size_t>(
+       std::distance(m_players.begin(), disconnected_player))};
+   std::cout << "removing player " << player_index << '\n';
+   m_players.erase(disconnected_player);
+
+   std::cout << "Attempting to re-establish connection with client (timeout: "
+             << reconnect_wait_time_seconds << "s)\n";
+   try {
+      IPv4Address client_address{};
+      ClientSocket player{
+          m_server.acceptClient(client_address, reconnect_wait_time_seconds)};
+      if (player_index <= m_players.size()) {
+         m_players.insert(disconnected_player, std::move(player));
+      } else {
+         m_players.push_back(std::move(player));
+      }
+   } catch (const NetworkException& e) {
+      std::cerr << "Unable to reconnect client: " << e.what() << '\n';
+   }
+}
+
 void GameManager::gameLoop() {
    try {
       broadcastGameState();
@@ -98,7 +133,7 @@ void GameManager::gameLoop() {
    } catch (const SocketDisconnectException& e) {
       std::cerr << "Player with socket descriptor " << e.socketDescriptor()
                 << " disconnected.\n";
-      throw;
+      handleDisconnect(e.socketDescriptor());
    }
 }
 

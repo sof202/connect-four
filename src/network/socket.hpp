@@ -50,6 +50,10 @@ class Socket {
       return *this;
    }
 
+   auto operator==(int socket_descriptor) const -> bool {
+      return m_socket_descriptor == socket_descriptor;
+   }
+
   private:
    int m_socket_descriptor{};
 };
