@@ -24,7 +24,7 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
       teardown();
       setSocketDescriptor(socket(AF_INET, SOCK_STREAM, 0));
    }
-   for (int attempt{}; attempt < max_attempts; ++attempt) {
+   for (int attempt{0}; attempt <= max_attempts; ++attempt) {
       if (connect(socketDescriptor(),
                   server_address,
                   server_address.length()) == 0) {
