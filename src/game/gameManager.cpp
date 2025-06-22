@@ -124,7 +124,8 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
       }
       std::cout << "Client reconnected\n";
    } catch (const NetworkException& e) {
-      std::cerr << "Unable to reconnect client: " << e.what() << '\n';
+      throw NetworkException("Unable to reconnect client: " +
+                             std::string(e.what()));
    }
 }
 
