@@ -1,6 +1,8 @@
 #ifndef NETWORK_EXCEPTION_H_
 #define NETWORK_EXCEPTION_H_
 
+#include <cerrno>
+#include <cstring>
 #include <stdexcept>
 #include <string>
 
@@ -10,6 +12,13 @@ class NetworkException : public std::runtime_error {
   public:
    explicit NetworkException(const std::string& message) :
        std::runtime_error("[Network exception]: " + message) {}
+};
+
+class SocketCreationException : public NetworkException {
+  public:
+   explicit SocketCreationException(int error_code) :
+       NetworkException("Socket creation failed " +
+                        std::string(strerror(error_code))) {}
 };
 
 class SocketDisconnectException : public NetworkException {

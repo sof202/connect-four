@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "network/networkException.hpp"
+
 class Socket {
   protected:
    Socket(int domain, int socket_type, int protocol = 0) :
@@ -24,6 +26,14 @@ class Socket {
    }
    [[nodiscard]] auto socketDescriptor() const noexcept -> int {
       return m_socket_descriptor;
+   }
+   void setSocketDescriptor(int socket_descriptor) {
+      teardown();
+      m_socket_descriptor = socket_descriptor;
+      if (!isValid()) {
+         int error_code{errno};
+         throw SocketCreationException(error_code);
+      }
    }
    void setAddressReusage(bool enable) const;
 
