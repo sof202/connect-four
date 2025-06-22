@@ -60,7 +60,6 @@ auto main(int argc, char** argv) -> int {
       }
       game.log("Game finished.");
 
-      std::cout << "Game ended...\n";
    } catch (const std::exception& e) {
       std::cerr << e.what() << '\n';
    } catch (...) {
