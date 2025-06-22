@@ -11,6 +11,7 @@
 
 #include "network/address.hpp"
 #include "network/message.hpp"
+#include "network/networkException.hpp"
 
 void ClientSocket::connectToServer(const IPv4Address& server_address) {
    if (connect(socketDescriptor(), server_address, server_address.length()) <
@@ -30,7 +31,11 @@ void ClientSocket::connectToServer(const IPv4Address& server_address) {
    uint32_t length{};
    ssize_t bytes_received{
        recv(socketDescriptor(), &length, sizeof(length), flags)};
-   if (bytes_received < 0) throw std::runtime_error("Connection closed.");
+   if (bytes_received == 0) throw SocketDisconnectException();
+   if (bytes_received < 0) {
+      throw std::runtime_error("An error occurred: " +
+                               std::string(strerror(errno)));
+   }
    length = ntohl(length);
    if (length > max_size) throw std::runtime_error("Message too large.");
 
