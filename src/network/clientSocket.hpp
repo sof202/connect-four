@@ -22,7 +22,9 @@ class ClientSocket : public Socket {
    auto operator=(ClientSocket&& other) noexcept -> ClientSocket& = default;
 
    [[nodiscard]] auto isConnected() const -> bool { return m_is_connected; }
-   void connectToServer(const IPv4Address& server_address);
+   void connectToServer(const IPv4Address& server_address,
+                        int max_attempts = 1,
+                        bool reconnect = false);
 
    [[nodiscard]] auto receiveMessage(std::size_t max_size, int flags = 0) const
        -> Message;

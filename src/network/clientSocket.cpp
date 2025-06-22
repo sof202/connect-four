@@ -5,21 +5,45 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <chrono>
+#include <cmath>
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #include "network/address.hpp"
 #include "network/message.hpp"
 #include "network/networkException.hpp"
 
-void ClientSocket::connectToServer(const IPv4Address& server_address) {
-   if (connect(socketDescriptor(), server_address, server_address.length()) <
-       0) {
-      throw std::runtime_error("Error connecting to server: " +
-                               std::string(strerror(errno)));
+void ClientSocket::connectToServer(const IPv4Address& server_address,
+                                   int max_attempts,
+                                   bool reconnect) {
+   if (isConnected() && reconnect) {
+      teardown();
+      setSocketDescriptor(socket(AF_INET, SOCK_STREAM, 0));
    }
-   m_is_connected = true;
+   for (int attempt{}; attempt < max_attempts; ++attempt) {
+      if (connect(socketDescriptor(),
+                  server_address,
+                  server_address.length()) == 0) {
+         m_is_connected = true;
+         return;
+      }
+      if (attempt < max_attempts) {
+         std::cerr << "Could not connect to server, retrying... (attempt: "
+                   << attempt + 1 << ")\n";
+         teardown();
+         setSocketDescriptor(socket(AF_INET, SOCK_STREAM, 0));
+
+         constexpr int max_delay_seconds{30};
+         int delay_seconds{std::min(max_delay_seconds,
+                                    static_cast<int>(std::pow(2, attempt)))};
+         std::this_thread::sleep_for(std::chrono::seconds(delay_seconds));
+      }
+   }
+   throw SocketConnectionException(server_address);
 }
 
 [[nodiscard]] auto ClientSocket::receiveMessage(std::size_t max_size,
