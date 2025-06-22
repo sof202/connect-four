@@ -11,6 +11,7 @@ enum Type : std::uint8_t {
    requestInput,
    end,
    info,
+   clearScreen,
    maxMessageType,
 };
 using namespace std::string_view_literals;
@@ -18,6 +19,7 @@ constexpr std::array message_type_names{
     "MOVE"sv,
     "REQUESTINPUT"sv,
     "END"sv,
+    "CLEARSCREEN"sv,
     "INFO"sv,
 };
 static_assert(message_type_names.size() ==

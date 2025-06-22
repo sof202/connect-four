@@ -58,6 +58,10 @@ auto handleMessage(const Message& message, const ClientSocket& client_socket)
              {MessageType::Type::move, std::to_string(column_index)});
          return true;
       }
+      case MessageType::clearScreen: {
+         std::cout << "[H[J";
+         return true;
+      }
       default:
          return true;
    }
