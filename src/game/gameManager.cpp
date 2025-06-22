@@ -52,6 +52,9 @@ void GameManager::broadcastGameState() {
                                 "You are playing with the " +
                                     std::string(1, m_player_pieces[i]) +
                                     " pieces.\n"});
+      if (i != m_player_turn)
+         m_players[i].sendMessage(
+             {MessageType::info, "Waiting for other player...\n"});
    }
 }
 
