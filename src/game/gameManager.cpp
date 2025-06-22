@@ -96,7 +96,8 @@ void GameManager::gameLoop() {
       checkGameEnd(move);
       updatePlayer();
    } catch (const SocketDisconnectException& e) {
-      std::cerr << "Player " << m_player_turn << " disconnected.\n";
+      std::cerr << "Player with socket descriptor " << e.socketDescriptor()
+                << " disconnected.\n";
       throw;
    }
 }

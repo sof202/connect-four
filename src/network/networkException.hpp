@@ -23,11 +23,19 @@ class SocketCreationException : public NetworkException {
 
 class SocketDisconnectException : public NetworkException {
   public:
-   explicit SocketDisconnectException() :
-       NetworkException("Socket was disconnected") {}
-   explicit SocketDisconnectException(int error_code) :
+   explicit SocketDisconnectException(int socket_descriptor) :
+       NetworkException("Socket was disconnected"),
+       m_socket_descriptor{socket_descriptor} {}
+   explicit SocketDisconnectException(int socket_descriptor, int error_code) :
        NetworkException("Socket was disconnected " +
-                        std::string(strerror(error_code))) {}
+                        std::string(strerror(error_code))),
+       m_socket_descriptor{socket_descriptor} {}
+   [[nodiscard]] auto socketDescriptor() const -> int {
+      return m_socket_descriptor;
+   }
+
+  private:
+   int m_socket_descriptor{};
 };
 
 class SocketConnectionException : public NetworkException {

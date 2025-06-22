@@ -49,13 +49,14 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
 [[nodiscard]] auto ClientSocket::receiveMessage(std::size_t max_size,
                                                 int flags) const -> Message {
    if (!isConnected()) {
-      throw SocketDisconnectException();
+      throw SocketDisconnectException(socketDescriptor());
    }
 
    uint32_t length{};
    ssize_t bytes_received{
        recv(socketDescriptor(), &length, sizeof(length), flags)};
-   if (bytes_received == 0) throw SocketDisconnectException();
+   if (bytes_received == 0)
+      throw SocketDisconnectException(socketDescriptor());
    if (bytes_received < 0) {
       throw NetworkException("An error occurred: " +
                              std::string(strerror(errno)));
@@ -75,7 +76,7 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
 
 void ClientSocket::sendMessage(const Message& message, int flags) const {
    if (!isConnected()) {
-      throw SocketDisconnectException();
+      throw SocketDisconnectException(socketDescriptor());
    }
    std::string to_send{message.asString()};
    uint32_t length{htonl(static_cast<uint32_t>(to_send.size()))};
@@ -87,7 +88,7 @@ void ClientSocket::sendMessage(const Message& message, int flags) const {
       int error_code{errno};
       if (error_code == EPIPE || error_code == ECONNRESET ||
           error_code == ENOTCONN)
-         throw SocketDisconnectException(error_code);
+         throw SocketDisconnectException(socketDescriptor(), error_code);
       throw NetworkException("Couldn't send message " +
                              std::string(strerror(error_code)));
    }
@@ -99,7 +100,7 @@ void ClientSocket::sendMessage(const Message& message, int flags) const {
       int error_code{errno};
       if (error_code == EPIPE || error_code == ECONNRESET ||
           error_code == ENOTCONN)
-         throw SocketDisconnectException(error_code);
+         throw SocketDisconnectException(socketDescriptor(), error_code);
       throw NetworkException("Couldn't send message " +
                              std::string(strerror(error_code)));
    }
