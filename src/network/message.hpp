@@ -15,10 +15,10 @@ enum Type : std::uint8_t {
 };
 using namespace std::string_view_literals;
 constexpr std::array message_type_names{
-    "move"sv,
-    "requestInput"sv,
-    "end"sv,
-    "info"sv,
+    "MOVE"sv,
+    "REQUESTINPUT"sv,
+    "END"sv,
+    "INFO"sv,
 };
 static_assert(message_type_names.size() ==
               static_cast<std::size_t>(maxMessageType));
