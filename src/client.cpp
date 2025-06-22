@@ -14,6 +14,7 @@
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/message.hpp"
+#include "network/networkException.hpp"
 
 void ignoreLine() {
    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -75,8 +76,13 @@ auto main(int argc, char** argv) -> int {
       IPv4Address server_address{ip_address, port};
       client_socket.connectToServer(server_address);
       while (true) {
-         Message message{client_socket.receiveMessage(255)};
-         if (!handleMessage(message, client_socket)) break;
+         try {
+            Message message{client_socket.receiveMessage(255)};
+            if (!handleMessage(message, client_socket)) break;
+         } catch (const SocketDisconnectException& e) {
+            std::cerr << e.what() << '\n';
+            client_socket.connectToServer(server_address, 5, true);
+         }
       }
 
    } catch (const std::exception& e) {
