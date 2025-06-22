@@ -112,11 +112,13 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
       IPv4Address client_address{};
       ClientSocket player{
           m_server.acceptClient(client_address, reconnect_wait_time_seconds)};
+      player.sendMessage({MessageType::info, "Welcome back\n"});
       if (player_index <= m_players.size()) {
          m_players.insert(disconnected_player, std::move(player));
       } else {
          m_players.push_back(std::move(player));
       }
+      std::cout << "Client reconnected\n";
    } catch (const NetworkException& e) {
       std::cerr << "Unable to reconnect client: " << e.what() << '\n';
    }
