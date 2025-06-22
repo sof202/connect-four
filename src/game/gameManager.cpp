@@ -105,10 +105,13 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
           "Could not find disconnected player in player list");
    }
 
-   std::size_t player_index{static_cast<std::size_t>(
+   std::size_t disconnected_player_index{static_cast<std::size_t>(
        std::distance(m_players.begin(), disconnected_player))};
-   std::cout << "removing player " << player_index << '\n';
+   std::cout << "removing player " << disconnected_player_index << '\n';
    m_players.erase(disconnected_player);
+   std::size_t waiting_player_index{(disconnected_player_index + 1) % 2};
+   m_players[waiting_player_index].sendMessage(
+       {MessageType::info, "Oppenent disconnected, waiting for reconnect.\n"});
 
    std::cout << "Attempting to re-establish connection with client (timeout: "
              << reconnect_wait_time_seconds << "s)\n";
@@ -117,13 +120,16 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
       ClientSocket player{
           m_server.acceptClient(client_address, reconnect_wait_time_seconds)};
       player.sendMessage({MessageType::info, "Welcome back\n"});
-      if (player_index <= m_players.size()) {
+      if (disconnected_player_index <= m_players.size()) {
          m_players.insert(disconnected_player, std::move(player));
       } else {
          m_players.push_back(std::move(player));
       }
       std::cout << "Client reconnected\n";
    } catch (const NetworkException& e) {
+      m_players[waiting_player_index].sendMessage(
+          {MessageType::info,
+           "Ok, so they didn't come back, I guess you win...\n"});
       throw NetworkException("Unable to reconnect client: " +
                              std::string(e.what()));
    }
