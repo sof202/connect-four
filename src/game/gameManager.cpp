@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-#include <stdexcept>
 #include <string>
 
 #include "network/address.hpp"
@@ -136,7 +135,7 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
 }
 
 void GameManager::gameLoop() {
-   enum class GameState { broadcast, move, checkEnd, endTurn };
+   enum class GameState : uint8_t { broadcast, move, checkEnd, endTurn };
    GameState current_state{GameState::broadcast};
    int move{};
    while (current_state != GameState::endTurn) {
