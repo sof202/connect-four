@@ -25,6 +25,9 @@ class SocketDisconnectException : public NetworkException {
   public:
    explicit SocketDisconnectException() :
        NetworkException("Socket was disconnected") {}
+   explicit SocketDisconnectException(int error_code) :
+       NetworkException("Socket was disconnected " +
+                        std::string(strerror(error_code))) {}
 };
 
 class SocketConnectionException : public NetworkException {

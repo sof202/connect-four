@@ -49,7 +49,7 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
 [[nodiscard]] auto ClientSocket::receiveMessage(std::size_t max_size,
                                                 int flags) const -> Message {
    if (!isConnected()) {
-      throw std::runtime_error("Socket is not connected.");
+      throw SocketDisconnectException();
    }
 
    uint32_t length{};
@@ -57,8 +57,8 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
        recv(socketDescriptor(), &length, sizeof(length), flags)};
    if (bytes_received == 0) throw SocketDisconnectException();
    if (bytes_received < 0) {
-      throw std::runtime_error("An error occurred: " +
-                               std::string(strerror(errno)));
+      throw NetworkException("An error occurred: " +
+                             std::string(strerror(errno)));
    }
    length = ntohl(length);
    if (length > max_size) throw std::runtime_error("Message too large.");
@@ -66,26 +66,42 @@ void ClientSocket::connectToServer(const IPv4Address& server_address,
    std::string buffer(length, '\0');
    bytes_received =
        recv(socketDescriptor(), buffer.data(), buffer.size(), flags);
-   if (bytes_received < 0) throw std::runtime_error("Connection closed.");
+   if (bytes_received < 0)
+      throw NetworkException("An error occurred: " +
+                             std::string(strerror(errno)));
 
    return Message::fromString(buffer);
 }
 
 void ClientSocket::sendMessage(const Message& message, int flags) const {
    if (!isConnected()) {
-      throw std::runtime_error("Socket is not connected.");
+      throw SocketDisconnectException();
    }
    std::string to_send{message.asString()};
    uint32_t length{htonl(static_cast<uint32_t>(to_send.size()))};
 
-   if (send(socketDescriptor(), &length, sizeof(length), flags) < 0) {
-      throw std::runtime_error("Error writing length to socket + " +
-                               std::string(strerror(errno)));
+   if (send(socketDescriptor(),
+            &length,
+            sizeof(length),
+            flags | MSG_NOSIGNAL) != sizeof(length)) {
+      int error_code{errno};
+      if (error_code == EPIPE || error_code == ECONNRESET ||
+          error_code == ENOTCONN)
+         throw SocketDisconnectException(error_code);
+      throw NetworkException("Couldn't send message " +
+                             std::string(strerror(error_code)));
    }
 
-   if (send(socketDescriptor(), to_send.c_str(), to_send.size(), flags) < 0) {
-      throw std::runtime_error("Error writing message to socket + " +
-                               std::string(strerror(errno)));
+   if (send(socketDescriptor(),
+            to_send.c_str(),
+            to_send.size(),
+            flags | MSG_NOSIGNAL) != static_cast<ssize_t>(to_send.size())) {
+      int error_code{errno};
+      if (error_code == EPIPE || error_code == ECONNRESET ||
+          error_code == ENOTCONN)
+         throw SocketDisconnectException(error_code);
+      throw NetworkException("Couldn't send message " +
+                             std::string(strerror(error_code)));
    }
 }
 
