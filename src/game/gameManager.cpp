@@ -129,18 +129,35 @@ void GameManager::handleDisconnect(int disconnected_socket_descriptor,
 }
 
 void GameManager::gameLoop() {
-   try {
-      broadcastGameState();
-      int move{getPlayerMove()};
-      m_game.addPiece(static_cast<std::size_t>(move),
-                      m_player_pieces[m_player_turn]);
-      checkGameEnd(move);
-      updatePlayer();
-   } catch (const SocketDisconnectException& e) {
-      std::cerr << "Player with socket descriptor " << e.socketDescriptor()
-                << " disconnected.\n";
-      handleDisconnect(e.socketDescriptor());
+   enum class GameState { broadcast, move, checkEnd, endTurn };
+   GameState current_state{GameState::broadcast};
+   int move{};
+   while (current_state != GameState::endTurn) {
+      try {
+         switch (current_state) {
+            case GameState::broadcast:
+               broadcastGameState();
+               current_state = GameState::move;
+               break;
+            case GameState::move:
+               move = getPlayerMove();
+               m_game.addPiece(static_cast<std::size_t>(move),
+                               m_player_pieces[m_player_turn]);
+               current_state = GameState::checkEnd;
+               break;
+            case GameState::checkEnd:
+               checkGameEnd(move);
+               current_state = GameState::endTurn;
+               break;
+            default:
+               break;
+         }
+      } catch (const SocketDisconnectException& e) {
+         std::cerr << "Player with socket descriptor " << e.socketDescriptor()
+                   << " disconnected.\n";
+         handleDisconnect(e.socketDescriptor());
+      }
    }
+   updatePlayer();
 }
-
 }  // namespace ConnectFour
