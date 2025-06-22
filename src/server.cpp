@@ -1,26 +1,14 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#include <chrono>
 #include <cstring>
-#include <functional>
 #include <iostream>
 #include <string>
-#include <thread>
-#include <vector>
 
 #include "game/gameManager.hpp"
 #include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/serverSocket.hpp"
-
-void handleClient(ClientSocket client_socket, ConnectFour::GameManager& game) {
-   game.addPlayer(std::move(client_socket));
-   while (game.connectedPlayers() < 2) {
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-      game.log("Wating for both players to join...");
-   }
-}
 
 auto main(int argc, char** argv) -> int {
    if (argc != 3) {
@@ -39,19 +27,13 @@ auto main(int argc, char** argv) -> int {
       std::cout << "Server (ip: " << ip_address << ") listening on port "
                 << port << "...\n";
 
-      std::vector<std::thread> client_threads{};
       ConnectFour::GameManager game;
 
       for (int i{0}; i < 2; i++) {
          IPv4Address client_address{};
          ClientSocket client_socket{
              server_socket.acceptClient(client_address)};
-         client_threads.emplace_back(
-             handleClient, std::move(client_socket), std::ref(game));
-      }
-
-      for (auto& thread : client_threads) {
-         if (thread.joinable()) thread.join();
+         game.addPlayer(std::move(client_socket));
       }
 
       game.startGame();
