@@ -83,7 +83,8 @@ auto main(int argc, char** argv) -> int {
             Message message{client_socket.receiveMessage(255)};
             if (!handleMessage(message, client_socket)) break;
          } catch (const SocketDisconnectException& e) {
-            std::cerr << e.what() << '\n';
+            std::cerr << e.what()
+                      << " (unfotunately, game state will be lost)\n";
             client_socket.connectToServer(server_address, 5, true);
          }
       }
