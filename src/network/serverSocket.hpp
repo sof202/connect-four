@@ -25,7 +25,8 @@ class ServerSocket : public Socket {
 
    void bindToAddress(const IPv4Address& address) const;
    void listen(int backlog) const;
-   auto acceptClient(IPv4Address& client_address) const -> ClientSocket;
+   auto acceptClient(IPv4Address& client_address,
+                     int timeout_seconds = -1) const -> ClientSocket;
 };
 
 #endif  // SERVER_SOCKET_H_
