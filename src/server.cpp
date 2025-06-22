@@ -27,16 +27,9 @@ auto main(int argc, char** argv) -> int {
       std::cout << "Server (ip: " << ip_address << ") listening on port "
                 << port << "...\n";
 
-      ConnectFour::GameManager game;
+      ConnectFour::GameManager game{std::move(server_socket)};
 
-      for (int i{0}; i < 2; i++) {
-         IPv4Address client_address{};
-         ClientSocket client_socket{
-             server_socket.acceptClient(client_address)};
-         game.addPlayer(std::move(client_socket));
-      }
-
-      game.startGame();
+      game.initialise();
       while (game.isGameActive()) {
          game.gameLoop();
       }

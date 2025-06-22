@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 
+#include "network/address.hpp"
 #include "network/clientSocket.hpp"
 #include "network/message.hpp"
 
@@ -29,14 +30,15 @@ void GameManager::addPlayer(ClientSocket player) {
    log("New client connected.");
 }
 
-void GameManager::startGame() {
+void GameManager::initialise() {
    if (m_game_active) {
       std::cerr << "Warning: Game already started.\n";
       return;
    }
-   if (m_players.size() < 2) {
-      std::cerr << "Warning: Game doesn't have enough players yet.\n";
-      return;
+   while (m_players.size() < 2) {
+      IPv4Address client_address{};
+      ClientSocket player{m_server.acceptClient(client_address)};
+      addPlayer(std::move(player));
    }
    m_game_active = true;
 }
